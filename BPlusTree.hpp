@@ -140,6 +140,12 @@ namespace Fugue {
         //! For debugging purposes; print the node and its children.
         void dbgPrint();
 
+        void* getKeyValue(Key k){
+            if(_isLeaf)
+                return _children[_positionFor(k)];
+            return static_cast<BPlusNode<Key, size>*>(_children[_positionFor(k)])->getKeyValue(k);
+        }
+
         //Move assignment/construction.
         BPlusNode<Key, size>& operator=(const BPlusNode<Key, size>&& rhs);
 
@@ -193,6 +199,7 @@ namespace Fugue {
             else
                 std::cout << "nullptr\n\n";
         }
+        std::cout << "\n\n";
     }
 
     template<class Key, unsigned int size>

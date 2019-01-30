@@ -14,6 +14,7 @@ int main() {
     t.insert(0, data);
     t.insert(11, data);
     t.dbgPrint();
+    std::cout << "Value is " << *(int*)t.get(8) << "\n";
     std::cout << "Hello, World!" << std::endl;
     return 0;
 }
