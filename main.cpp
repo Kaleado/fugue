@@ -2,9 +2,14 @@
 #include "BPlusTree.hpp"
 
 int main() {
-    Fugue::BPlusTree<int, 10> t;
-    int* data = new int(1);
-    t.insert(1, data);
+    Fugue::BPlusTree<int, 3> t;
+    int* data = new int(333);
+    t.insert(2, data);
+    t.insert(7, data);
+    t.insert(9, data);
+    t.insert(5, data);
+    t.insert(10, data);
+    t.dbgPrint();
     std::cout << "Hello, World!" << std::endl;
     return 0;
 }
