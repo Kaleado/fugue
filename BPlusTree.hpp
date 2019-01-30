@@ -58,7 +58,7 @@ namespace Fugue {
         //! Shifts all elements of an array to the right by shiftBy indices, starting from idx.
         template<class S, int sz>
         void _rightShiftArray(std::array<S, sz>& arr, int idx, int shiftBy){
-            for(int i = idx - shiftBy; i > idx; ++i){
+            for(int i = sz - shiftBy - 1; i >= idx; --i){
                 arr[i + shiftBy] = arr[i];
             }
         }
@@ -81,6 +81,7 @@ namespace Fugue {
             //Now we must properly rearrange the parent's children and keys.
             if(this == _tree->_root){
                 _parent = new BPlusNode(_tree, false, nullptr);
+                newNode->_parent = _parent;
                 _tree->_root = _parent;
             }
             //Insert the appropriate node as the left child.
@@ -116,6 +117,7 @@ namespace Fugue {
         void _leafInsertAfter(Key k, void* data) {
             //Insert into this node.
             int pos = _positionFor(k) + 1;
+            //_rightShiftArray<void*, size+1>(_children, pos, 1);
             _children[pos] = data;
         }
 
@@ -132,9 +134,9 @@ namespace Fugue {
                     _children[pos] = new BPlusNode(_tree, true, this);
                 auto child = static_cast<BPlusNode<Key, size>*>(_children[pos]);
                 if(child->_isLeaf)
-                    _leafInsert(k, data);
+                    child->_leafInsert(k, data);
                 else
-                    _innerInsert(k, data);
+                    child->_innerInsert(k, data);
             }
         }
 
