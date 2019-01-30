@@ -6,6 +6,10 @@
 
 #IncludeRegexTransform: 
 
+/home/kaleado/Programming/fugue/BPlusTree.cpp
+BPlusTree.hpp
+/home/kaleado/Programming/fugue/BPlusTree.hpp
+
 /home/kaleado/Programming/fugue/BPlusTree.hpp
 array
 -

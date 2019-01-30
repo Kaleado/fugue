@@ -98,6 +98,7 @@ namespace Fugue {
         //Move down the tree as we insert this item, assuming this node is a leaf node.
         void _leafInsert(Key k, void* data) {
             if(_currentSize + 1 > size){
+                std::cout << "Splitting node...\n";
                 //TODO: We split the node.
                 _splitAndInsert(k, data);
             }
@@ -123,21 +124,15 @@ namespace Fugue {
 
         //Move down the tree as we insert this item, assuming this node is an inner node.
         void _innerInsert(Key k, void* data) {
-            if(_currentSize + 1 > size){
-                //TODO: We split the node.
-                //We will need to write another method to handle this case: using _innerInsert will result in an infinite loop.
-            }
-            else {
-                //Insert into this node.
-                int pos = _positionFor(k);
-                if(!_children[pos])
-                    _children[pos] = new BPlusNode(_tree, true, this);
-                auto child = static_cast<BPlusNode<Key, size>*>(_children[pos]);
-                if(child->_isLeaf)
-                    child->_leafInsert(k, data);
-                else
-                    child->_innerInsert(k, data);
-            }
+            //Insert into this node.
+            int pos = _positionFor(k);
+            if(!_children[pos])
+                _children[pos] = new BPlusNode(_tree, true, this);
+            auto child = static_cast<BPlusNode<Key, size>*>(_children[pos]);
+            if(child->_isLeaf)
+                child->_leafInsert(k, data);
+            else
+                child->_innerInsert(k, data);
         }
 
     public:
