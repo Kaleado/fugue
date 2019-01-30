@@ -137,12 +137,8 @@ namespace Fugue {
 
     public:
 
+        //! For debugging purposes; print the node and its children.
         void dbgPrint();
-
-        //! Insert a key into this node.
-        void insertKey(Key k) {
-
-        }
 
         //Move assignment/construction.
         BPlusNode<Key, size>& operator=(const BPlusNode<Key, size>&& rhs);
@@ -206,7 +202,7 @@ namespace Fugue {
 
     template<class Key, unsigned int size>
     void* BPlusTree<Key, size>::get(Key k) {
-        return nullptr;
+        return _root->getKeyValue(k);
     }
 
     template<class Key, unsigned int size>
