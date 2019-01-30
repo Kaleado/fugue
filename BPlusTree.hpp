@@ -21,20 +21,17 @@ namespace Fugue {
         BPlusNode<Key, size>* _root;
     public:
 
-        void* get(Key& k) {
-            return nullptr;
-        }
+        void* get(Key k);
 
-        void remove(Key& k) {
+        void remove(Key k);
 
-        }
-
-        void insert(Key& k, void* value) {
-
-        }
+        void insert(Key k, void* value);
 
         BPlusTree<Key, size>() = default;
+
+        friend class BPlusNode<Key, size>;
     };
+
 
     template<class Key, int size>
     class BPlusNode {
@@ -46,14 +43,59 @@ namespace Fugue {
         std::array<Key, size> _keys;
         std::array<void*, size+1> _children;
 
-        //! Split this node into two, propagating the middle node upwards.
-        void _directInsertKey(Key& k) {
+        int _positionFor(Key k){
+            //TODO: use a binary search for this instead.
+            int i;
+            for(i = 0; i < _currentSize; ++i){
+                if(_keys[i] >= k) break;
+            }
+            return i;
+        }
 
+        //! Shifts all elements of an array to the right by shiftBy indices, starting from idx.
+        template<class S, int sz>
+        void _rightShiftArray(std::array<S, sz>& arr, int idx, int shiftBy){
+            for(int i = idx - shiftBy; i > idx; ++i){
+                arr[i + shiftBy] = arr[i];
+            }
+        }
+
+        //Move down the tree as we insert this item, assuming this node is a leaf node.
+        void _leafInsert(Key k, void* data) {
+            if(_currentSize + 1 > size){
+                //TODO: We split the node.
+                //We will need to write another method to handle this case: using _innerInsert will result in an infinite loop.
+            }
+            else {
+                //Insert into this node.
+                int pos = _positionFor(k);
+                _rightShiftArray<void*, size+1>(_children, pos, 1);
+                _children[pos] = data;
+                _rightShiftArray<Key, size>(_keys, pos, 1);
+                _keys[pos] = k;
+            }
+        }
+
+        //Move down the tree as we insert this item, assuming this node is an inner node.
+        void _innerInsert(Key k, void* data) {
+            if(_currentSize + 1 > size){
+                //TODO: We split the node.
+                //We will need to write another method to handle this case: using _innerInsert will result in an infinite loop.
+            }
+            else {
+                //Insert into this node.
+                int pos = _positionFor(k);
+                auto child = static_cast<BPlusNode<Key, size>*>(_children[pos]);
+                if(child->_isLeaf)
+                    _leafInsert(k, data);
+                else
+                    _innerInsert(k, data);
+            }
         }
 
     public:
         //! Insert a key into this node.
-        void insertKey(Key& k) {
+        void insertKey(Key k) {
 
         }
 
@@ -87,7 +129,27 @@ namespace Fugue {
 
         BPlusNode<Key, size>(BPlusTree<Key, size>* tree, bool isLeaf, BPlusNode<Key, size>* parent, std::array<Key, size> keys, std::array<void*, size+1> children)
                 : _tree{tree}, _isLeaf{isLeaf}, _parent{parent}, _keys{keys}, _children{children} {};
+
+        friend class BPlusTree<Key, size>;
     };
+
+    template<class Key, int size>
+    void* BPlusTree<Key, size>::get(Key k) {
+        return nullptr;
+    }
+
+    template<class Key, int size>
+    void BPlusTree<Key, size>::remove(Key k) {
+
+    }
+
+    template<class Key, int size>
+    void BPlusTree<Key, size>::insert(Key k, void* value) {
+        if(_root->_isLeaf)
+            _root->_leafInsert(k, value);
+        else
+            _root->_innerInsert(k, value);
+    }
 
 }
 
