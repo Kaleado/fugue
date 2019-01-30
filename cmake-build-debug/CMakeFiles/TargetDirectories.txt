@@ -1,0 +1,3 @@
+/home/kaleado/Programming/fugue/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/kaleado/Programming/fugue/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/kaleado/Programming/fugue/cmake-build-debug/CMakeFiles/fugue.dir
