@@ -42,8 +42,8 @@ namespace Fugue {
         //! Insert a key into this node.
         void insertKey(Key& k);
         //Move assignment/construction.
-        BPlusNode& operator=(const BPlusNode&& rhs);
-        BPlusNode(const BPlusNode&& rhs);
+        BPlusNode& operator=(const BPlusNode<Key, size>&& rhs);
+        BPlusNode(const BPlusNode<Key, size>&& rhs);
 
         //Copy assignment/construction.
         BPlusNode& operator=(const BPlusNode& rhs);
