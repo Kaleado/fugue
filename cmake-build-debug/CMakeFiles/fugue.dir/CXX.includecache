@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/kaleado/Programming/fugue/BPlusTree.cpp
+BPlusTree.hpp
+/home/kaleado/Programming/fugue/BPlusTree.hpp
+
+/home/kaleado/Programming/fugue/BPlusTree.hpp
+array
+-
+
+/home/kaleado/Programming/fugue/main.cpp
+iostream
+-
+BPlusTree.hpp
+/home/kaleado/Programming/fugue/BPlusTree.hpp
+
