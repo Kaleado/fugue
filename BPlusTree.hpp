@@ -153,12 +153,12 @@ namespace Fugue {
             return static_cast<BPlusNode<Key, size>*>(_children[_positionFor(k)])->getKeyValue(k);
         }
 
-        //Move assignment/construction.
+        // Move assignment/construction.
         BPlusNode<Key, size>& operator=(const BPlusNode<Key, size>&& rhs);
 
         BPlusNode<Key, size>(const BPlusNode<Key, size>&& rhs);
 
-        //Copy assignment/construction.
+        // Copy assignment/construction.
         BPlusNode<Key, size>& operator=(const BPlusNode<Key, size>& rhs) {
             _currentSize = rhs._currentSize;
             _parent = rhs._parent;
