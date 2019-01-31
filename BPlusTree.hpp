@@ -63,7 +63,9 @@ namespace Fugue {
             }
         }
 
+        //! Split this node and continue trying to insert the given key.
         void _splitAndInsert(Key k, void* data){
+            //Create a new node and copy the right half of the children and keys to it.
             unsigned int middleIndex = (size)/2;
             auto* newNode = new BPlusNode(_tree, _isLeaf, _parent);
             newNode->_currentSize = _currentSize - middleIndex;
@@ -72,13 +74,16 @@ namespace Fugue {
                 newNode->_children[j] = _children[middleIndex+j];
                 static_cast<BPlusNode<Key, size>*>(newNode->_children[j])->_parent = newNode;
             }
+            //Shrink the 'old' node.
             _currentSize = middleIndex;
+            //Try to insert the key into the appropriate node.
             auto newKey = _keys[middleIndex];
-            if(k < _keys[middleIndex])
+            if(k < newKey) // If this key should go on the left.
                 _leafInsert(k, data);
-            else
+            else //If this key should go on the right.
                 newNode->_leafInsert(k, data);
             //Now we must properly rearrange the parent's children and keys.
+            //If we are the root, we need to actually create a new node to contain the middle element.
             if(this == _tree->_root){
                 _parent = new BPlusNode(_tree, false, nullptr);
                 newNode->_parent = _parent;
@@ -86,22 +91,32 @@ namespace Fugue {
             }
             //Insert the appropriate node as the left child.
             if(k < newKey) {
+                // This node is the left node, and the other node is the right node.
                 _parent->_leafInsert(newKey, this);
-                _parent->_leafInsertAfter(newKey, newNode);
+                _parent->_insertChildAfter(newKey, newNode);
             }
             else{
+                //The other node is the left node, and this is the right node.
                 _parent->_leafInsert(newKey, newNode);
-                _parent->_leafInsertAfter(newKey, this);
+                _parent->_insertChildAfter(newKey, this);
             }
         }
 
-        //Move down the tree as we insert this item, assuming this node is a leaf node.
+        //! Insert a child pointer after the given key.
+        void _insertChildAfter(Key k, void *data) {
+            // Insert the child after this node.
+            int pos = _positionFor(k) + 1;
+            _children[pos] = data;
+        }
+
+        //! Insert this item assuming this node is a leaf node.
         void _leafInsert(Key k, void* data) {
             if(_currentSize + 1 > size){
+                // This node has grown too large - split it and try to insert it that way.
                 _splitAndInsert(k, data);
             }
             else {
-                //Insert into this node.
+                // Insert into this node.
                 int pos = _positionFor(k);
                 _rightShiftArray<void*, size+1>(_children, pos, 1);
                 _children[pos] = data;
@@ -111,18 +126,12 @@ namespace Fugue {
             }
         }
 
-        //Move down the tree as we insert this item, assuming this node is a leaf node.
-        void _leafInsertAfter(Key k, void* data) {
-            //Insert into this node.
-            int pos = _positionFor(k) + 1;
-            //_rightShiftArray<void*, size+1>(_children, pos, 1);
-            _children[pos] = data;
-        }
-
-        //Move down the tree as we insert this item, assuming this node is an inner node.
+        //! Move down the tree as we insert this item, assuming this node is an inner node.
         void _innerInsert(Key k, void* data) {
-            //Insert into this node.
+            // Insert into this node.
             int pos = _positionFor(k);
+            // If we try to traverse into a node that doesn't exist, we found the right spot and we should make a node to
+            // hold the key.
             if(!_children[pos])
                 _children[pos] = new BPlusNode(_tree, true, this);
             auto child = static_cast<BPlusNode<Key, size>*>(_children[pos]);
