@@ -22,8 +22,9 @@ namespace Fugue {
         BPlusNode<Key, size>* _root;
     public:
 
+#ifdef DEBUG
         void* dbgPrint();
-
+#endif
         void* get(Key k);
 
         void remove(Key k);
@@ -49,7 +50,6 @@ namespace Fugue {
             //TODO: use a binary search for this instead.
             int i;
             for(i = 0; i < _currentSize; ++i){
-                std::cout << _keys[i] << " ";
                 if(_keys[i] >= k) break;
             }
             return i;
@@ -98,14 +98,11 @@ namespace Fugue {
         //Move down the tree as we insert this item, assuming this node is a leaf node.
         void _leafInsert(Key k, void* data) {
             if(_currentSize + 1 > size){
-                std::cout << "Splitting node...\n";
-                //TODO: We split the node.
                 _splitAndInsert(k, data);
             }
             else {
                 //Insert into this node.
                 int pos = _positionFor(k);
-                std::cout << "Inserted key " << k << " at position " << pos << "\n";
                 _rightShiftArray<void*, size+1>(_children, pos, 1);
                 _children[pos] = data;
                 _rightShiftArray<Key, size>(_keys, pos, 1);
@@ -137,9 +134,10 @@ namespace Fugue {
 
     public:
 
+#ifdef DEBUG
         //! For debugging purposes; print the node and its children.
         void dbgPrint();
-
+#endif
         void* getKeyValue(Key k){
             if(_isLeaf)
                 return _children[_positionFor(k)];
@@ -180,6 +178,7 @@ namespace Fugue {
         friend class BPlusTree<Key, size>;
     };
 
+#ifdef DEBUG
     template<class Key, unsigned int size>
     void BPlusNode<Key, size>::dbgPrint() {
         std::cout << "This node is " << (_isLeaf ? "" : "not ") << "a leaf.\n";
@@ -206,6 +205,7 @@ namespace Fugue {
     void* BPlusTree<Key, size>::dbgPrint() {
         _root->dbgPrint();
     }
+#endif
 
     template<class Key, unsigned int size>
     void* BPlusTree<Key, size>::get(Key k) {
@@ -219,7 +219,6 @@ namespace Fugue {
 
     template<class Key, unsigned int size>
     void BPlusTree<Key, size>::insert(Key k, void* value) {
-        std::cout << "Inserting key " << k << "...\n";
         if(_root && _root->_isLeaf)
             _root->_leafInsert(k, value);
         else
