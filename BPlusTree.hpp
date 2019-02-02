@@ -48,6 +48,7 @@ namespace Fugue {
         std::array<Key, size> _keys;
         std::array<void*, size+1> _children;
 
+        //! Finds the index of the given child node in _children.
         int _positionOfChild(BPlusNode<Key, size>* c){
             int pos = 0;
             for(pos = 0; pos <= _currentSize; ++pos){
@@ -57,18 +58,21 @@ namespace Fugue {
             return -1;
         }
 
+        //! Returns the left sibling of this node.
         BPlusNode<Key, size>* _left(){
             if(_parent == nullptr) return nullptr;
             int pos = _parent->_positionOfChild(this);
             return pos <= 0 ? nullptr : static_cast<BPlusNode<Key, size>*>(_parent->_children[pos - 1]);
         }
 
+        //! Returns the right sibling of this node.
         BPlusNode<Key, size>* _right(){
             if(_parent == nullptr) return nullptr;
             int pos = _parent->_positionOfChild(this);
             return pos + 1 > _parent->_currentSize || pos < 0 ? nullptr : static_cast<BPlusNode<Key, size>*>(_parent->_children[pos + 1]);
         }
 
+        //! Returns the index of the child node where key k lies.
         int _positionFor(Key k){
             //TODO: use a binary search for this instead.
             int i;
@@ -78,11 +82,19 @@ namespace Fugue {
             return i;
         }
 
-        //! Shifts all elements of an array to the right by shiftBy indices, starting from idx.
+        //! Shifts all elements of an array to the right by shiftBy indices, in the range idx.._currentSize.
         template<class S, int sz>
         void _rightShiftArray(std::array<S, sz>& arr, int idx, int shiftBy){
             for(int i = sz - shiftBy - 1; i >= idx; --i){
                 arr[i + shiftBy] = arr[i];
+            }
+        }
+
+        //! Shifts all elements of an array to the left by shiftBy indices, in the range 0..idx.
+        template<class S, int sz>
+        void _leftShiftArray(std::array<S, sz>& arr, int idx, int shiftBy){
+            for(int i = shiftBy; i < idx; ++i){
+                arr[i - shiftBy] = arr[i];
             }
         }
 
@@ -136,7 +148,7 @@ namespace Fugue {
             _children[pos] = data;
         }
 
-        //! Insert this item assuming this node is a leaf node.
+        //! Insert an item assuming this node is a leaf node.
         void _leafInsert(Key k, void* data) {
             if(_currentSize + 1 > size){
                 // This node has grown too large - split it and try to insert it that way.
@@ -181,6 +193,7 @@ namespace Fugue {
         //! For debugging purposes; print the node and its children.
         void dbgPrint();
 #endif
+        //! Retrieve the value from the tree associated with this key.
         void* getKeyValue(Key k){
             if(_isLeaf)
                 return _children[_positionFor(k)];
