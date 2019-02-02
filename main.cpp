@@ -1,4 +1,7 @@
+#define DEBUG
+
 #include <iostream>
+
 #include "BPlusTree.hpp"
 
 int main() {

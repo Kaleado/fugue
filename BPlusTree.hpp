@@ -31,7 +31,7 @@ namespace Fugue {
 
         void insert(Key k, void* value);
 
-        BPlusTree<Key, size>() : _root{new BPlusNode<Key, size>(this, true, nullptr)} {}
+        BPlusTree<Key, size>() : _root{new BPlusNode<Key, size>(this, true, nullptr, nullptr, nullptr)} {}
 
         friend class BPlusNode<Key, size>;
     };
@@ -42,9 +42,32 @@ namespace Fugue {
         bool _isLeaf;
         BPlusTree<Key, size>* _tree;
         BPlusNode<Key, size>* _parent;
+        BPlusNode* _leftSibling;
+        BPlusNode* _rightSibling;
         int _currentSize = 0;
         std::array<Key, size> _keys;
         std::array<void*, size+1> _children;
+
+        int _positionOfChild(BPlusNode<Key, size>* c){
+            int pos = 0;
+            for(pos = 0; pos <= _currentSize; ++pos){
+                if (_children[pos] == c)
+                    return pos;
+            }
+            return -1;
+        }
+
+        BPlusNode<Key, size>* _left(){
+            if(_parent == nullptr) return nullptr;
+            int pos = _parent->_positionOfChild(this);
+            return pos <= 0 ? nullptr : static_cast<BPlusNode<Key, size>*>(_parent->_children[pos - 1]);
+        }
+
+        BPlusNode<Key, size>* _right(){
+            if(_parent == nullptr) return nullptr;
+            int pos = _parent->_positionOfChild(this);
+            return pos + 1 > _parent->_currentSize || pos < 0 ? nullptr : static_cast<BPlusNode<Key, size>*>(_parent->_children[pos + 1]);
+        }
 
         int _positionFor(Key k){
             //TODO: use a binary search for this instead.
@@ -67,7 +90,7 @@ namespace Fugue {
         void _splitAndInsert(Key k, void* data){
             //Create a new node and copy the right half of the children and keys to it.
             unsigned int middleIndex = (size)/2;
-            auto* newNode = new BPlusNode(_tree, _isLeaf, _parent);
+            auto* newNode = new BPlusNode(_tree, _isLeaf, _parent, _leftSibling, _rightSibling);
             newNode->_currentSize = _currentSize - middleIndex;
             for(int j = 0; j < newNode->_currentSize; ++j){
                 newNode->_keys[j] = _keys[middleIndex+j];
@@ -85,7 +108,7 @@ namespace Fugue {
             //Now we must properly rearrange the parent's children and keys.
             //If we are the root, we need to actually create a new node to contain the middle element.
             if(this == _tree->_root){
-                _parent = new BPlusNode(_tree, false, nullptr);
+                _parent = new BPlusNode(_tree, false, nullptr, nullptr, nullptr);
                 newNode->_parent = _parent;
                 _tree->_root = _parent;
             }
@@ -94,11 +117,15 @@ namespace Fugue {
                 // This node is the left node, and the other node is the right node.
                 _parent->_leafInsert(newKey, this);
                 _parent->_insertChildAfter(newKey, newNode);
+                this->_rightSibling = newNode;
+                newNode->_leftSibling = this;
             }
             else{
                 //The other node is the left node, and this is the right node.
                 _parent->_leafInsert(newKey, newNode);
                 _parent->_insertChildAfter(newKey, this);
+                this->_leftSibling = newNode;
+                newNode->_rightSibling = this;
             }
         }
 
@@ -132,8 +159,15 @@ namespace Fugue {
             int pos = _positionFor(k);
             // If we try to traverse into a node that doesn't exist, we found the right spot and we should make a node to
             // hold the key.
-            if(!_children[pos])
-                _children[pos] = new BPlusNode(_tree, true, this);
+            if(!_children[pos]){
+                BPlusNode<Key, size>* newLeftSibling = nullptr;
+                BPlusNode<Key, size>* newRightSibling = nullptr;
+                if(pos < size - 1)
+                    newRightSibling = static_cast<BPlusNode<Key, size>*>(_children[pos + 1]);
+                if(pos > 0)
+                    newLeftSibling = static_cast<BPlusNode<Key, size>*>(_children[pos - 1]);
+                _children[pos] = new BPlusNode(_tree, true, this, newLeftSibling, newRightSibling);
+            }
             auto child = static_cast<BPlusNode<Key, size>*>(_children[pos]);
             if(child->_isLeaf)
                 child->_leafInsert(k, data);
@@ -164,6 +198,8 @@ namespace Fugue {
             _parent = rhs._parent;
             _isLeaf = rhs._isLeaf;
             _children = rhs._children;
+            _leftSibling = rhs._leftSibling;
+            _rightSibling = rhs._rightSibling;
             _keys = rhs._keys;
             return *this;
         }
@@ -172,17 +208,19 @@ namespace Fugue {
             _currentSize = rhs._currentSize;
             _parent = rhs._parent;
             _isLeaf = rhs._isLeaf;
+            _leftSibling = rhs._leftSibling;
+            _rightSibling = rhs._rightSibling;
             _children = std::move(rhs._children);
             _keys = std::move(rhs._keys);
         }
 
         ~BPlusNode<Key, size>() = default;
 
-        BPlusNode<Key, size>(BPlusTree<Key, size>* tree, bool isLeaf, BPlusNode<Key, size>* parent)
-                : _tree{tree}, _isLeaf{isLeaf}, _parent{parent} {};
+        BPlusNode<Key, size>(BPlusTree<Key, size>* tree, bool isLeaf, BPlusNode<Key, size>* parent, BPlusNode<Key, size>* leftSibling, BPlusNode<Key, size>* rightSibling)
+                : _tree{tree}, _isLeaf{isLeaf}, _parent{parent}, _leftSibling{leftSibling}, _rightSibling{rightSibling} {}
 
-        BPlusNode<Key, size>(BPlusTree<Key, size>* tree, bool isLeaf, BPlusNode<Key, size>* parent, std::array<Key, size> keys, std::array<void*, size+1> children)
-                : _tree{tree}, _isLeaf{isLeaf}, _parent{parent}, _keys{keys}, _children{children} {};
+        BPlusNode<Key, size>(BPlusTree<Key, size>* tree, bool isLeaf, BPlusNode<Key, size>* parent, BPlusNode<Key, size>* leftSibling, BPlusNode<Key, size>* rightSibling, std::array<Key, size> keys, std::array<void*, size+1> children)
+                : _tree{tree}, _isLeaf{isLeaf}, _parent{parent}, _leftSibling{leftSibling}, _rightSibling{rightSibling}, _keys{keys}, _children{children} {};
 
         friend class BPlusTree<Key, size>;
     };
@@ -190,7 +228,8 @@ namespace Fugue {
 #ifdef DEBUG
     template<class Key, unsigned int size>
     void BPlusNode<Key, size>::dbgPrint() {
-        std::cout << "This node is " << (_isLeaf ? "" : "not ") << "a leaf.\n";
+        std::cout << "Node " << this << " is " << (_isLeaf ? "" : "not ") << "a leaf.\n";
+        std::cout << "Siblings: " << _left() << " " << _right() << "\n";
         for(unsigned int i = 0; i < _currentSize; ++i){
             std::cout << _keys[i] << " ";
         }
