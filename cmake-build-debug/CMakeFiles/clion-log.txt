@@ -1,4 +1,7 @@
 /home/kaleado/Downloads/CLion-2018.2.3/clion-2018.2.3/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/kaleado/Programming/fugue
+-- Boost version: 1.65.1
+-- Found the following Boost libraries:
+--   program_options
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/kaleado/Programming/fugue/cmake-build-debug

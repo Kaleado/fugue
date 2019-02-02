@@ -2,9 +2,25 @@
 
 #include <iostream>
 
+#include <boost/program_options.hpp>
+
 #include "BPlusTree.hpp"
 
-int main() {
+int main(int argc, char** argv) {
+    // Set up program options.
+    boost::program_options::options_description description("Allowed options");
+    description.add_options()
+    ("help", "display this message")
+    ("port", boost::program_options::value<int>(), "set TCP port to listen on");
+    boost::program_options::variables_map vars;
+    boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), vars);
+    boost::program_options::notify(vars);
+
+    if(vars.count("help")) {
+        std::cout << description << "\n";
+        return 1;
+    }
+
     Fugue::BPlusTree<int, 3> t;
     int* data = new int(333);
     t.insert(2, data);

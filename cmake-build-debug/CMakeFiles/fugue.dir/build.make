@@ -94,6 +94,7 @@ fugue_EXTERNAL_OBJECTS =
 fugue: CMakeFiles/fugue.dir/main.cpp.o
 fugue: CMakeFiles/fugue.dir/BPlusTree.cpp.o
 fugue: CMakeFiles/fugue.dir/build.make
+fugue: /usr/lib/x86_64-linux-gnu/libboost_program_options.so
 fugue: CMakeFiles/fugue.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/kaleado/Programming/fugue/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable fugue"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/fugue.dir/link.txt --verbose=$(VERBOSE)
