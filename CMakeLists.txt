@@ -3,12 +3,14 @@ project(fugue)
 
 set(CMAKE_CXX_STANDARD 14)
 
-find_package(Boost COMPONENTS program_options)
+SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread")
+
+find_package(Boost COMPONENTS system program_options)
 
 
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
-    add_executable(fugue main.cpp BPlusTree.cpp BPlusTree.hpp)
+    add_executable(fugue main.cpp BPlusTree.cpp BPlusTree.hpp ConnectionManager.cpp ConnectionManager.hpp ServerConfiguration.hpp AbstractKeyValueStore.hpp AbstractCommand.hpp CommandParser.cpp CommandParser.hpp)
     target_link_libraries(fugue ${Boost_LIBRARIES})
 endif()
 
