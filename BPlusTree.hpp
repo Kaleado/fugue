@@ -18,7 +18,7 @@ namespace Fugue {
     class BPlusNode;
 
     template<class Key, unsigned int size>
-    class BPlusTree {
+    class BPlusTree : public Fugue::AbstractKeyValueStore<Key> {
     private:
         BPlusNode<Key, size>* _root;
     public:
@@ -26,7 +26,7 @@ namespace Fugue {
 #ifdef DEBUG
         void* dbgPrint();
 #endif
-        void* get(Key k);
+        void* get(Key k) const;
 
         void remove(Key k);
 
@@ -38,7 +38,7 @@ namespace Fugue {
     };
 
     template<class Key, unsigned int size>
-    class BPlusNode : public Fugue::AbstractKeyValueStore<Key> {
+    class BPlusNode {
     private:
         bool _isLeaf;
         BPlusTree<Key, size>* _tree;
@@ -50,7 +50,7 @@ namespace Fugue {
         std::array<void*, size+1> _children;
 
         //! Finds the index of the given child node in _children.
-        int _positionOfChild(BPlusNode<Key, size>* c){
+        int _positionOfChild(BPlusNode<Key, size> const* c) const {
             int pos = 0;
             for(pos = 0; pos <= _currentSize; ++pos){
                 if (_children[pos] == c)
@@ -60,21 +60,21 @@ namespace Fugue {
         }
 
         //! Returns the left sibling of this node.
-        BPlusNode<Key, size>* _left(){
+        const BPlusNode<Key, size>* _left() const {
             if(_parent == nullptr) return nullptr;
             int pos = _parent->_positionOfChild(this);
             return pos <= 0 ? nullptr : static_cast<BPlusNode<Key, size>*>(_parent->_children[pos - 1]);
         }
 
         //! Returns the right sibling of this node.
-        BPlusNode<Key, size>* _right(){
+        const BPlusNode<Key, size>* _right() const {
             if(_parent == nullptr) return nullptr;
             int pos = _parent->_positionOfChild(this);
             return pos + 1 > _parent->_currentSize || pos < 0 ? nullptr : static_cast<BPlusNode<Key, size>*>(_parent->_children[pos + 1]);
         }
 
         //! Returns the index of the child node where key k lies.
-        int _positionFor(Key k){
+        int _positionFor(Key k) const {
             //TODO: use a binary search for this instead.
             int i;
             for(i = 0; i < _currentSize; ++i){
@@ -195,7 +195,7 @@ namespace Fugue {
         void dbgPrint();
 #endif
         //! Retrieve the value from the tree associated with this key.
-        void* getKeyValue(Key k){
+        void* getKeyValue(Key k) const {
             if(_isLeaf)
                 return _children[_positionFor(k)];
             return static_cast<BPlusNode<Key, size>*>(_children[_positionFor(k)])->getKeyValue(k);
@@ -270,7 +270,7 @@ namespace Fugue {
 #endif
 
     template<class Key, unsigned int size>
-    void* BPlusTree<Key, size>::get(Key k) {
+    void* BPlusTree<Key, size>::get(Key k) const {
         return _root->getKeyValue(k);
     }
 

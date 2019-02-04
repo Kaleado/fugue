@@ -12,7 +12,7 @@ namespace Fugue {
     class AbstractKeyValueStore {
     private:
     public:
-        virtual void* get(Key k) = 0;
+        virtual void* get(Key k) const = 0;
 
         virtual void remove(Key k) = 0;
 
