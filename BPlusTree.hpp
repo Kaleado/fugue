@@ -7,6 +7,7 @@
 
 #include <array>
 #include <iostream>
+#include "AbstractKeyValueStore.hpp"
 
 namespace Fugue {
 
@@ -37,7 +38,7 @@ namespace Fugue {
     };
 
     template<class Key, unsigned int size>
-    class BPlusNode {
+    class BPlusNode : public Fugue::AbstractKeyValueStore<Key> {
     private:
         bool _isLeaf;
         BPlusTree<Key, size>* _tree;
