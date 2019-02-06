@@ -30,3 +30,14 @@
 *.exe
 *.out
 *.app
+
+.idea
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+fugue
+test_fugue
+fugue.cbp
+googletest-*
+cmake-build-debug
