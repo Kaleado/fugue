@@ -1,5 +1,7 @@
 # Fugue
 
+[![Build Status](https://travis-ci.org/Kaleado/fugue.svg?branch=master)](https://travis-ci.org/Kaleado/fugue)
+
 ## Overview
 An all-in-memory key-value store written in C++.
 

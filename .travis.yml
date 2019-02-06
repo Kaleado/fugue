@@ -1,0 +1,11 @@
+language: c++
+compiler: gcc
+before_install:
+  - sudo apt-get install -y libboost-all-dev
+script:
+  - ./scripts/build.sh
+os: linux
+notifications:
+  email:
+    recipients:
+      - kaleadoskope@hotmail.com
