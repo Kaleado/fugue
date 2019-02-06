@@ -5,6 +5,8 @@
 #ifndef FUGUE_SERVERCONFIGURATION_HPP
 #define FUGUE_SERVERCONFIGURATION_HPP
 
+#include <cstdlib>
+
 namespace Fugue {
 
     //! Encapsulates various configuration parameters for the Fugue server.
@@ -13,6 +15,7 @@ namespace Fugue {
     private:
     public:
         unsigned short listenPort = 11311;
+        std::size_t maxValueSize = 1024;
     };
 
 }
