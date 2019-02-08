@@ -6,6 +6,7 @@
 #define FUGUE_DATAITEM_HPP
 
 #include <cstddef>
+#include <new>
 
 namespace Fugue {
 

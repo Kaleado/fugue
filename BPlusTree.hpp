@@ -8,6 +8,7 @@
 #include <array>
 #include <iostream>
 #include "AbstractKeyValueStore.hpp"
+#include "DataItem.hpp"
 
 namespace Fugue {
 
@@ -189,6 +190,29 @@ namespace Fugue {
                 child->_innerInsert(k, data);
         }
 
+        void _updateKey(int keyIndex, Key newK){
+#ifdef DEBUG
+            assert(keyIndex >= 0 && keyIndex < _currentSize);
+#endif
+            _keys[keyIndex] = newK;
+        }
+
+        void _leafRemove(Key k){
+            int pos = _positionFor(k);
+            if(_children[pos]){
+                auto* itm = static_cast<DataItem*>(_children[pos]);
+                itm->free<void*>();
+                _children[pos] = nullptr;
+                _leftShiftArray<void*, size+1>(_children, pos, 1);
+                _leftShiftArray<Key, size>(_keys, pos, 1);
+                _currentSize--;
+            }
+        }
+
+        void _innerRemove(Key k){
+
+        }
+
     public:
 
 #ifdef DEBUG
@@ -209,6 +233,48 @@ namespace Fugue {
                 return ptr->getKeyValue(k);
             else
                 return nullptr;
+        }
+
+        void searchAndRemoveKey(Key k){
+            // Traverse down the tree until we find where the item should be.
+            // If the key is not in here, do nothing.
+            // If we find it, delete it, reshuffle the array back into order.
+                // If we have less than size/2 items:
+                    // Borrow from the left sibling if it has more than size/2 items.
+                    // Merge the left sibling if it does not.
+                    // Borrow from the right sibling if there is no left sibling and it has more than size/2 items.
+                    // Merge if it does not.
+                    // If we have a parent:
+                        // If the minimum value changed and this node is not the first child of its parent, adjust the value of the
+                        // previous key in the parent.
+                        // Move up the hierarchy and repeat this process.
+                    //If we do not:
+                        // If we have only one child, delete ourselves and make the root the child.
+
+            if(_isLeaf){
+                Key minKey = _keys[0];
+                _leafRemove(k);
+                if(_currentSize < size/2){
+                    // TODO: Borrow, merge, etc.
+                }
+                if(_parent){
+                    if(_keys[0] != minKey){
+                        // Update the previous key in the parent.
+                        int prevKeyPos = _parent->_positionFor(k);
+                        if(prevKeyPos > 0)
+                            _parent->_updateKey(prevKeyPos, _keys[0]);
+                    }
+                    //TODO: Move up the hierarchy.
+                }
+            }
+            else{
+                int keyPos = _positionFor(k);
+#ifdef DEBUG
+                assert(keyPos >= 0 && keyPos < _currentSize);
+#endif
+                if(_children[keyPos])
+                    static_cast<BPlusNode<Key, size>*>(_children[keyPos])->searchAndRemoveKey(k);
+            }
         }
 
         // Move assignment/construction.
@@ -286,7 +352,7 @@ namespace Fugue {
 
     template<class Key, unsigned int size>
     void BPlusTree<Key, size>::remove(Key k) {
-
+        _root->searchAndRemoveKey(k);
     }
 
     template<class Key, unsigned int size>
