@@ -1,5 +1,5 @@
-echo "======Generating Makefile...======\n"
+echo "======Generating Makefile...======"
 cmake CMakeLists.txt
 echo ""
-echo "======Building Fugue...======\n"
+echo "======Building Fugue...======"
 make

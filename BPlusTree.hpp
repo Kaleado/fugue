@@ -198,7 +198,6 @@ namespace Fugue {
         //! Retrieve the value from the tree associated with this key.
         void* getKeyValue(Key k) const {
             int keyPos = _positionFor(k);
-            std::cout << keyPos << " (" << _isLeaf << "); ";
             if(_isLeaf){
                 if(keyPos >= 0 && _keys[keyPos] == k)
                     return _children[keyPos];
