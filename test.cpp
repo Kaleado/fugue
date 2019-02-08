@@ -126,6 +126,7 @@ TEST(BPlusTreeTest, StringKeyGetMissingShouldBeNull) {
     ASSERT_EQ(tree.get("eght"), nullptr);
     ASSERT_EQ(tree.get("zer"), nullptr);
     ASSERT_EQ(tree.get("elevenaa"), nullptr);
+    ASSERT_EQ(tree.get("twoseven"), nullptr);
 }
 
 TEST(BPlusTreeTest, StringKeyGetInvalidShouldBeNull) {
@@ -147,6 +148,8 @@ TEST(BPlusTreeTest, StringKeyGetInvalidShouldBeNull) {
     //Assert we can't get items with invalid keys.
     ASSERT_EQ(tree.get(""), nullptr);
     ASSERT_EQ(tree.get(" "), nullptr);
+    ASSERT_EQ(tree.get("\0"), nullptr);
+    ASSERT_EQ(tree.get("\0two\0"), nullptr);
 
 }
 
