@@ -8,6 +8,7 @@
 #include "AbstractCommand.hpp"
 #include "GetCommand.hpp"
 #include "SetCommand.hpp"
+#include "RemoveCommand.hpp"
 
 namespace Fugue {
 
@@ -17,7 +18,7 @@ namespace Fugue {
     private:
         typename AbstractCommand<Key>::Ptr _parseGet(std::vector<std::string> tokens);
         typename AbstractCommand<Key>::Ptr _parseSet(std::vector<std::string> tokens);
-        typename AbstractCommand<Key>::Ptr _parseDelete(std::vector<std::string> tokens);
+        typename AbstractCommand<Key>::Ptr _parseRemove(std::vector<std::string> tokens);
 
     public:
         typename AbstractCommand<Key>::Ptr parse(std::string str);
@@ -45,9 +46,10 @@ namespace Fugue {
     }
 
     template<class Key>
-    typename AbstractCommand<Key>::Ptr CommandParser<Key>::_parseDelete(std::vector<std::string> tokens) {
-        throw std::runtime_error("Error: not implemented.");
-        return nullptr;
+    typename AbstractCommand<Key>::Ptr CommandParser<Key>::_parseRemove(std::vector<std::string> tokens) {
+        if(tokens.size() != 2)
+            throw std::invalid_argument("Error parsing command: invalid number of arguments.");
+        return std::make_shared<RemoveCommand<Key>>(tokens[1]);
     }
 
     template<class Key>
@@ -65,8 +67,8 @@ namespace Fugue {
             return _parseGet(tokens);
         else if(command == "set")
             return _parseSet(tokens);
-        else if(command == "delete")
-            return _parseDelete(tokens);
+        else if(command == "remove")
+            return _parseRemove(tokens);
         else
             throw std::invalid_argument("Error parsing command: invalid command.");
     }

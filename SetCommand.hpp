@@ -5,7 +5,6 @@
 #ifndef FUGUE_SETCOMMAND_HPP
 #define FUGUE_SETCOMMAND_HPP
 
-
 #include "AbstractCommand.hpp"
 #include "AbstractKeyValueStore.hpp"
 
@@ -34,7 +33,6 @@ namespace Fugue {
         state.settingKey = _key;
         state.incomingBinaryLength = _length;
     }
-
 
 }
 

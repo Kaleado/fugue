@@ -37,6 +37,9 @@ namespace Fugue {
         delete static_cast<T*>(raw);
     }
 
+    template<>
+    void DataItem::free<void>();
+
 }
 
 #endif //FUGUE_DATAITEM_HPP
