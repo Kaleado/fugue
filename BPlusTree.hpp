@@ -78,7 +78,7 @@ namespace Fugue {
             //TODO: use a binary search for this instead.
             int i;
             for(i = 0; i < _currentSize; ++i){
-                if(_keys[i] >= k) break;
+                if(_keys[i] > k) break;
             }
             return i;
         }
@@ -145,7 +145,7 @@ namespace Fugue {
         //! Insert a child pointer after the given key.
         void _insertChildAfter(Key k, void *data) {
             // Insert the child after this node.
-            int pos = _positionFor(k) + 1;
+            int pos = _positionFor(k);
             _children[pos] = data;
         }
 
