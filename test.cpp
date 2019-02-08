@@ -153,6 +153,15 @@ TEST(BPlusTreeTest, StringKeyGetInvalidShouldBeNull) {
 
 }
 
+TEST(BPlusTreeTest, IntKeyRemovalSuccess) {
+    Fugue::BPlusTree<int, 3> tree;
+    auto *data1 = new Fugue::DataItem(new int(111), sizeof(int));
+    tree.insert(2, data1);
+    tree.remove(2);
+
+    ASSERT_EQ(tree.get(2), nullptr);
+}
+
 int main(int argc, char** argv){
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
