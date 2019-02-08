@@ -202,7 +202,11 @@ namespace Fugue {
                 else
                     return nullptr;
             }
-            return static_cast<BPlusNode<Key, size>*>(_children[_positionFor(k)])->getKeyValue(k);
+            auto* ptr = static_cast<BPlusNode<Key, size>*>(_children[_positionFor(k)]);
+            if (ptr)
+                return ptr->getKeyValue(k);
+            else
+                return nullptr;
         }
 
         // Move assignment/construction.
