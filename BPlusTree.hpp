@@ -78,7 +78,8 @@ namespace Fugue {
             //TODO: use a binary search for this instead.
             int i;
             for(i = 0; i < _currentSize; ++i){
-                if(_keys[i] > k) break;
+                if(!_isLeaf && _keys[i] > k) break;
+                if(_isLeaf && _keys[i] >= k) break;
             }
             return i;
         }
@@ -196,13 +197,15 @@ namespace Fugue {
 #endif
         //! Retrieve the value from the tree associated with this key.
         void* getKeyValue(Key k) const {
+            int keyPos = _positionFor(k);
+            std::cout << keyPos << " (" << _isLeaf << "); ";
             if(_isLeaf){
-                if(_keys[_positionFor(k) - 1] == k)
-                    return _children[_positionFor(k) - 1];
+                if(keyPos >= 0 && _keys[keyPos] == k)
+                    return _children[keyPos];
                 else
                     return nullptr;
             }
-            auto* ptr = static_cast<BPlusNode<Key, size>*>(_children[_positionFor(k)]);
+            auto* ptr = static_cast<BPlusNode<Key, size>*>(_children[keyPos]);
             if (ptr)
                 return ptr->getKeyValue(k);
             else
