@@ -81,13 +81,21 @@ namespace Fugue {
         int _positionFor(Key k) const {
             //TODO: use a binary search for this instead.
             int i;
-            for(i = 0; i < _currentSize; ++i){
-                std::cout << i << ": " << _keys[i] << ", ";
-                if((_isLeaf && _keys[i] >= k) ||
-                (!_isLeaf && _keys[i] > k)) return i;
+            if(_isLeaf){
+                std::cout << "This is a leaf...\n";
+                for(i = 0; i < _currentSize; ++i){
+                    std::cout << i << ": " << _keys[i] << ", ";
+                    if( _keys[i] >= k){ std::cout << "\n"; return i; }
+                }
             }
-            std::cout << "\n";
-            return i;
+            else {
+                std::cout << "This is not a leaf...\n";
+                for(i = 0; i < _currentSize; ++i){
+                    std::cout << i << ": " << _keys[i] << ", ";
+                    if( _keys[i] > k){ std::cout << "\n"; return i; }
+                }
+            }
+            return _currentSize;
         }
 
         //! Shifts all elements of an array to the right by shiftBy indices, in the range idx.._currentSize.
