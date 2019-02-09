@@ -107,7 +107,9 @@ namespace Fugue {
         //! Split this node and continue trying to insert the given key.
         void _split(Key k, void *data){
             //Create a new node and copy the right half of the children and keys to it.
+#ifdef DEBUG
             std::cout << "Splitting " << this << " to insert " << k << "\n";
+#endif
             unsigned int middleIndex = (size + 1)/2;
             auto* newNode = new BPlusNode(_tree, _isLeaf, _parent, _leftSibling, _rightSibling);
             newNode->_currentSize = size - middleIndex + (_isLeaf ? 1 : 0);
@@ -143,7 +145,9 @@ namespace Fugue {
         void _leafInsert(Key k, void* data) {
             // Insert into this node.
             int pos = _positionFor(k);
+#ifdef DEBUG
             std::cout << "Inserting " << k << " into leaf " << this << " at position " << pos << "\n";
+#endif
             _rightShiftArray<void*, size+2>(_children, pos, 1);
             _children[pos] = data;
             _rightShiftArray<Key, size+1>(_keys, pos, 1);
@@ -159,7 +163,9 @@ namespace Fugue {
         void _innerInsert(Key k, void* data) {
             // Insert into this node.
             int pos = _positionFor(k);
+#ifdef DEBUG
             std::cout << "Inserting " << k << " into " << this << " at position " << pos << "\n";
+#endif
             auto child = static_cast<BPlusNode<Key, size>*>(_children[pos]);
             child->_parent = this;
             if(child->_isLeaf)
