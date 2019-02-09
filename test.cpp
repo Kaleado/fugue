@@ -214,7 +214,7 @@ private:
     Fugue::BPlusNode<int, 3>& _n;
 public:
     std::array<int, 4>& keys;
-    int& currentSize;
+    unsigned int& currentSize;
     template <int size>
     void rightShiftArray(std::array<int, size>& arr, int idx, int shiftBy){_n._rightShiftArray<int, size>(arr, idx, shiftBy);}
     int positionFor(int k){ return _n._positionFor(k); }

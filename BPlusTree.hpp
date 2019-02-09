@@ -27,7 +27,7 @@ namespace Fugue {
     public:
 
 #ifdef DEBUG
-        void* dbgPrint();
+        void dbgPrint();
 #endif
         void* get(Key k) const;
 
@@ -44,18 +44,18 @@ namespace Fugue {
     class BPlusNode {
         friend class ::BPlusNodeIntKeyTest;
     private:
-        bool _isLeaf;
         BPlusTree<Key, size>* _tree;
+        bool _isLeaf;
         BPlusNode<Key, size>* _parent;
         BPlusNode* _leftSibling;
         BPlusNode* _rightSibling;
-        int _currentSize = 0;
+        unsigned int _currentSize = 0;
         std::array<Key, size+1> _keys;
         std::array<void*, size+2> _children;
 
         //! Finds the index of the given child node in _children.
         int _positionOfChild(BPlusNode<Key, size> const* c) const {
-            int pos = 0;
+            unsigned int pos = 0;
             for(pos = 0; pos <= _currentSize; ++pos){
                 if (_children[pos] == c)
                     return pos;
@@ -73,14 +73,14 @@ namespace Fugue {
         //! Returns the right sibling of this node.
         const BPlusNode<Key, size>* _right() const {
             if(_parent == nullptr) return nullptr;
-            int pos = _parent->_positionOfChild(this);
+            unsigned int pos = _parent->_positionOfChild(this);
             return pos + 1 > _parent->_currentSize || pos < 0 ? nullptr : static_cast<BPlusNode<Key, size>*>(_parent->_children[pos + 1]);
         }
 
         //! Returns the index of the child node where key k lies.
-        int _positionFor(Key k) const {
+        unsigned int _positionFor(Key k) const {
             //TODO: use a binary search for this instead.
-            int i;
+            unsigned int i;
             if(_isLeaf){
                 std::cout << "This is a leaf " <<  _currentSize << "...\n";
                 for(i = 0; i < _currentSize; ++i){
@@ -123,7 +123,7 @@ namespace Fugue {
             unsigned int middleIndex = (size + 1)/2;
             auto* newNode = new BPlusNode(_tree, _isLeaf, _parent, _leftSibling, _rightSibling);
             newNode->_currentSize = size - middleIndex + (_isLeaf ? 1 : 0);
-            for(int j = 0; j < newNode->_currentSize; ++j){
+            for(unsigned int j = 0; j < newNode->_currentSize; ++j){
                 newNode->_keys[j] = _keys[middleIndex+j+(_isLeaf ? 0 : 1)];
                 newNode->_children[j] = _children[middleIndex+j+(_isLeaf ? 0 : 1)];
                 static_cast<BPlusNode<Key, size>*>(newNode->_children[j])->_parent = newNode;
@@ -147,14 +147,14 @@ namespace Fugue {
         //! Insert a child pointer after the given key.
         void _insertChildAfter(Key k, void *data) {
             // Insert the child after this node.
-            int pos = _positionFor(k);
+            unsigned int pos = _positionFor(k);
             _children[pos] = data;
         }
 
         //! Insert an item assuming this node is a leaf node.
         void _leafInsert(Key k, void* data) {
             // Insert into this node.
-            int pos = _positionFor(k);
+            unsigned int pos = _positionFor(k);
 #ifdef DEBUG
             std::cout << "Inserting " << k << " into leaf " << this << " at position " << pos << "\n";
 #endif
@@ -172,7 +172,7 @@ namespace Fugue {
         //! Move down the tree as we insert this item, assuming this node is an inner node.
         void _innerInsert(Key k, void* data) {
             // Insert into this node.
-            int pos = _positionFor(k);
+            unsigned int pos = _positionFor(k);
 #ifdef DEBUG
             std::cout << "Inserting " << k << " into " << this << " at position " << pos << "\n";
 #endif
@@ -184,7 +184,7 @@ namespace Fugue {
                 child->_innerInsert(k, data);
         }
 
-        void _updateKey(int keyIndex, Key newK){
+        void _updateKey(unsigned int keyIndex, Key newK){
 #ifdef DEBUG
             assert(keyIndex >= 0 && keyIndex < _currentSize);
 #endif
@@ -192,7 +192,7 @@ namespace Fugue {
         }
 
         void _leafRemove(Key k){
-            int pos = _positionFor(k);
+            unsigned int pos = _positionFor(k);
             if(_children[pos]){
                 auto* itm = static_cast<DataItem*>(_children[pos]);
                 itm->free<void*>();
@@ -215,7 +215,7 @@ namespace Fugue {
 #endif
         //! Retrieve the value from the tree associated with this key.
         void* getKeyValue(Key k) const {
-            int keyPos = _positionFor(k);
+            unsigned int keyPos = _positionFor(k);
             if(_isLeaf){
                 if(keyPos >= 0 && _keys[keyPos] == k)
                     return _children[keyPos];
@@ -254,7 +254,7 @@ namespace Fugue {
                 if(_parent){
                     if(_keys[0] != minKey){
                         // Update the previous key in the parent.
-                        int prevKeyPos = _parent->_positionFor(k);
+                        unsigned int prevKeyPos = _parent->_positionFor(k);
                         if(prevKeyPos > 0)
                             _parent->_updateKey(prevKeyPos, _keys[0]);
                     }
@@ -262,7 +262,7 @@ namespace Fugue {
                 }
             }
             else{
-                int keyPos = _positionFor(k);
+                unsigned int keyPos = _positionFor(k);
 #ifdef DEBUG
                 assert(keyPos >= 0 && keyPos < _currentSize);
 #endif
@@ -285,6 +285,7 @@ namespace Fugue {
             _leftSibling = rhs._leftSibling;
             _rightSibling = rhs._rightSibling;
             _keys = rhs._keys;
+            _tree = rhs._tree;
             return *this;
         }
 
@@ -294,8 +295,9 @@ namespace Fugue {
             _isLeaf = rhs._isLeaf;
             _leftSibling = rhs._leftSibling;
             _rightSibling = rhs._rightSibling;
-            _children = std::move(rhs._children);
-            _keys = std::move(rhs._keys);
+            _children = rhs._children;
+            _keys = rhs._keys;
+            _tree = rhs._tree;
         }
 
         ~BPlusNode<Key, size>() = default;
@@ -335,7 +337,7 @@ namespace Fugue {
     }
 
     template<class Key, unsigned int size>
-    void* BPlusTree<Key, size>::dbgPrint() {
+    void BPlusTree<Key, size>::dbgPrint() {
         _root->dbgPrint();
     }
 #endif
