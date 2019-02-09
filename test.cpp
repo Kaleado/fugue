@@ -162,6 +162,118 @@ TEST(BPlusTreeTest, IntKeyRemovalSuccess) {
     ASSERT_EQ(tree.get(2), nullptr);
 }
 
+TEST(BPlusTreeTest, IntKeyInsertFewKeys) {
+    int num = 5;
+    Fugue::BPlusTree<int, 3> tree;
+    auto* data1 = new Fugue::DataItem(new int(111), sizeof(int));
+    for(int i = 0; i < num; ++i)
+        tree.insert(i, data1);
+
+    tree.dbgPrint();
+
+    for(int i = 0; i < num; ++i){
+        std::cout << i << " ";
+        ASSERT_NE(tree.get(i), nullptr);
+    }
+}
+
+TEST(BPlusTreeTest, IntKeyInsertMoreKeys) {
+    int num = 10;
+    Fugue::BPlusTree<int, 3> tree;
+    auto* data1 = new Fugue::DataItem(new int(111), sizeof(int));
+    for(int i = 0; i < num; ++i)
+        tree.insert(i, data1);
+
+    tree.dbgPrint();
+
+    for(int i = 0; i < num; ++i){
+        std::cout << i << " ";
+        ASSERT_NE(tree.get(i), nullptr);
+    }
+}
+
+
+TEST(BPlusTreeTest, IntKeyInsertManyKeys) {
+    int num = 400;
+    Fugue::BPlusTree<int, 3> tree;
+    auto* data1 = new Fugue::DataItem(new int(111), sizeof(int));
+    for(int i = 0; i < num; ++i)
+        tree.insert(i, data1);
+
+    tree.dbgPrint();
+
+    for(int i = 0; i < num; ++i){
+        std::cout << i << " ";
+        ASSERT_NE(tree.get(i), nullptr);
+    }
+}
+
+//! Test fixture class for BPlusNodes with integer keys.
+class BPlusNodeIntKeyTest {
+private:
+    Fugue::BPlusNode<int, 3>& _n;
+public:
+    std::array<int, 4>& keys;
+    int& currentSize;
+    template <int size>
+    void rightShiftArray(std::array<int, size>& arr, int idx, int shiftBy){_n._rightShiftArray<int, size>(arr, idx, shiftBy);}
+    int positionFor(int k){ return _n._positionFor(k); }
+    explicit BPlusNodeIntKeyTest(Fugue::BPlusNode<int, 3> n) : _n{n}, keys{n._keys}, currentSize{n._currentSize} {}
+};
+
+TEST(BPlusNodeTest, PositionForInnerNode) {
+    Fugue::BPlusNode<int, 3> node{nullptr, false, nullptr, nullptr, nullptr};
+    BPlusNodeIntKeyTest n{node};
+    n.keys = {1,4,7};
+    n.currentSize = 3;
+
+    ASSERT_EQ(n.positionFor(2), 1);
+    ASSERT_EQ(n.positionFor(0), 0);
+    ASSERT_EQ(n.positionFor(1), 1);
+    ASSERT_EQ(n.positionFor(4), 2);
+    ASSERT_EQ(n.positionFor(7), 3);
+
+    n.keys = {6};
+    n.currentSize = 1;
+
+    ASSERT_EQ(n.positionFor(11), 1);
+}
+
+TEST(BPlusNodeTest, PositionForLeaf) {
+    Fugue::BPlusNode<int, 3> node{nullptr, true, nullptr, nullptr, nullptr};
+    BPlusNodeIntKeyTest n{node};
+    n.keys = {1,4,7};
+    n.currentSize = 3;
+
+    ASSERT_EQ(n.positionFor(2), 1);
+    ASSERT_EQ(n.positionFor(0), 0);
+    ASSERT_EQ(n.positionFor(1), 0);
+    ASSERT_EQ(n.positionFor(4), 1);
+    ASSERT_EQ(n.positionFor(7), 2);
+}
+
+
+TEST(BPlusNodeTest, RightShiftArray) {
+    Fugue::BPlusNode<int, 3> node{nullptr, true, nullptr, nullptr, nullptr};
+    BPlusNodeIntKeyTest n{node};
+    n.keys = {1,7,0,0};
+    n.currentSize = 2;
+
+    n.rightShiftArray<4>(n.keys, 1, 1);
+    std::array<int, 4> res = {1,7,7,0};
+    ASSERT_EQ(n.keys, res);
+
+    n.keys = {1,7,0,0};
+    n.rightShiftArray<4>(n.keys, 0, 1);
+    res = {1,1,7,0};
+    ASSERT_EQ(n.keys, res);
+
+    n.keys = {1,7,0,0};
+    n.rightShiftArray<4>(n.keys, 0, 1);
+    res = {1,1,7,0};
+    ASSERT_EQ(n.keys, res);
+}
+
 int main(int argc, char** argv){
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
