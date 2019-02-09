@@ -82,8 +82,8 @@ namespace Fugue {
             //TODO: use a binary search for this instead.
             int i;
             for(i = 0; i < _currentSize; ++i){
-                if(!_isLeaf && _keys[i] > k) break;
-                if(_isLeaf && _keys[i] >= k) break;
+                if((_isLeaf && _keys[i] >= k) ||
+                (!_isLeaf && _keys[i] > k)) break;
             }
             return i;
         }
