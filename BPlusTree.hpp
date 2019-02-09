@@ -82,14 +82,14 @@ namespace Fugue {
             //TODO: use a binary search for this instead.
             int i;
             if(_isLeaf){
-                std::cout << "This is a leaf...\n";
+                std::cout << "This is a leaf " <<  _currentSize << "...\n";
                 for(i = 0; i < _currentSize; ++i){
                     std::cout << i << ": " << _keys[i] << ", ";
                     if( _keys[i] >= k){ std::cout << "\n"; return i; }
                 }
             }
             else {
-                std::cout << "This is not a leaf...\n";
+                std::cout << "This is not a leaf " <<  _currentSize << "...\n";
                 for(i = 0; i < _currentSize; ++i){
                     std::cout << i << ": " << _keys[i] << ", ";
                     if( _keys[i] > k){ std::cout << "\n"; return i; }
