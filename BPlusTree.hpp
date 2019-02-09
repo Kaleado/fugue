@@ -124,9 +124,11 @@ namespace Fugue {
             auto* newNode = new BPlusNode(_tree, _isLeaf, _parent, _leftSibling, _rightSibling);
             newNode->_currentSize = size - middleIndex + (_isLeaf ? 1 : 0);
             for(unsigned int j = 0; j < newNode->_currentSize; ++j){
-                newNode->_keys[j] = _keys[middleIndex+j+(_isLeaf ? 0 : 1)];
-                newNode->_children[j] = _children[middleIndex+j+(_isLeaf ? 0 : 1)];
-                static_cast<BPlusNode<Key, size>*>(newNode->_children[j])->_parent = newNode;
+                unsigned int srcPos = middleIndex+j+(_isLeaf ? 0 : 1);
+                newNode->_keys.at(j) = _keys.at(srcPos);
+                newNode->_children.at(j) = _children.at(srcPos);
+                if(!_isLeaf)
+                    static_cast<BPlusNode<Key, size>*>(_children.at(srcPos))->_parent = newNode;
             }
             //Shrink the 'old' node.
             _currentSize = middleIndex;
@@ -195,7 +197,7 @@ namespace Fugue {
             unsigned int pos = _positionFor(k);
             if(_children[pos]){
                 auto* itm = static_cast<DataItem*>(_children[pos]);
-                itm->free<void*>();
+                itm->free<void>();
                 _children[pos] = nullptr;
                 _leftShiftArray<void*, size+2>(_children, pos, 1);
                 _leftShiftArray<Key, size+1>(_keys, pos, 1);
@@ -204,7 +206,7 @@ namespace Fugue {
         }
 
         void _innerRemove(Key k){
-
+            //TODO: this method.
         }
 
     public:

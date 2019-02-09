@@ -194,7 +194,7 @@ TEST(BPlusTreeTest, IntKeyInsertMoreKeys) {
 
 
 TEST(BPlusTreeTest, IntKeyInsertManyKeys) {
-    int num = 400;
+    int num = 1000;
     Fugue::BPlusTree<int, 3> tree;
     auto* data1 = new Fugue::DataItem(new int(111), sizeof(int));
     for(int i = 0; i < num; ++i)
