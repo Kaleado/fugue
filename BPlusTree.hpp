@@ -82,10 +82,11 @@ namespace Fugue {
             //TODO: use a binary search for this instead.
             int i;
             for(i = 0; i < _currentSize; ++i){
-                std::cout << i << " ";
+                std::cout << i << ": " << _keys[i] << " ";
                 if((_isLeaf && _keys[i] >= k) ||
                 (!_isLeaf && _keys[i] > k)) break;
             }
+            std::cout << "\n";
             return i;
         }
 
