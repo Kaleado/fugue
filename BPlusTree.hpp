@@ -324,12 +324,12 @@ namespace Fugue {
         std::cout << "Parent: " << _parent << "\n";
         std::cout << "Siblings: " << _left() << " " << _right() << "\n";
         for(unsigned int i = 0; i < _currentSize; ++i){
-            std::cout << _keys[i] << " ";
+            std::cout << _keys.at(i) << " ";
         }
-        std::cout << "\n";
-        for(unsigned int i = 0; i <= _currentSize; ++i){
-            std::cout << _children[i] << " ";
-        }
+//        std::cout << "\n";
+//        for(unsigned int i = 0; i <= _currentSize; ++i){
+//            std::cout << _children.at(i) << " ";
+//        }
         std::cout << "\n\n";
         if(_isLeaf)
             return;
