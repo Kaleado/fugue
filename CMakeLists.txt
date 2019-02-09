@@ -3,7 +3,7 @@ project(fugue)
 
 set(CMAKE_CXX_STANDARD 14)
 
-SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread -Wall -fsized-deallocation -fsanitize=undefined,address")
+SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread -Wall")
 
 #Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
