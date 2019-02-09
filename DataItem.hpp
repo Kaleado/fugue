@@ -14,8 +14,8 @@ namespace Fugue {
     class DataItem {
     private:
     public:
-        std::size_t length;
         void* raw;
+        std::size_t length;
 
         template<class T>
         T& get();
