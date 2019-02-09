@@ -20,6 +20,7 @@ namespace Fugue {
         void execute(AbstractKeyValueStore<Key>& store, ServerState& state, DataItem& buffer);
 
         explicit SetCommand(Key key, std::size_t& length) : _key{key}, _length{length} {}
+
     };
 
     template<class Key>

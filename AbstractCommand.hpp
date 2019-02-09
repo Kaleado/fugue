@@ -25,6 +25,7 @@ namespace Fugue {
         //! Execute the command in the context of the given underlying storage, writing the result to the buffer.
         virtual void execute(AbstractKeyValueStore<Key>& store, ServerState& state, DataItem& buffer)=0;
 
+        virtual ~AbstractCommand() = default;
     };
 }
 

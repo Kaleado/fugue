@@ -19,6 +19,7 @@ namespace Fugue {
         void execute(AbstractKeyValueStore<Key>& store, ServerState& state, DataItem& buffer);
 
         explicit RemoveCommand(Key key) : _key{key} {}
+
     };
 
     template<class Key>

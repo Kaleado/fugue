@@ -37,6 +37,10 @@ namespace Fugue {
 
         BPlusTree<Key, size>() : _root{new BPlusNode<Key, size>(this, true, nullptr, nullptr, nullptr)} {}
 
+        ~BPlusTree(){
+            delete _root;
+        }
+
         friend class BPlusNode<Key, size>;
     };
 
@@ -85,14 +89,14 @@ namespace Fugue {
                 std::cout << "This is a leaf " <<  _currentSize << "...\n";
                 for(i = 0; i < _currentSize; ++i){
                     std::cout << i << ": " << _keys[i] << ", ";
-                    if( _keys[i] >= k){ std::cout << "\n"; return i; }
+                    if( _keys.at(i) >= k){ std::cout << "\n"; return i; }
                 }
             }
             else {
                 std::cout << "This is not a leaf " <<  _currentSize << "...\n";
                 for(i = 0; i < _currentSize; ++i){
                     std::cout << i << ": " << _keys[i] << ", ";
-                    if( _keys[i] > k){ std::cout << "\n"; return i; }
+                    if( _keys.at(i) > k){ std::cout << "\n"; return i; }
                 }
             }
             return _currentSize;
