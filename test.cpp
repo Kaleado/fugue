@@ -224,7 +224,7 @@ public:
 TEST(BPlusNodeTest, PositionForInnerNode) {
     Fugue::BPlusNode<int, 3> node{nullptr, false, nullptr, nullptr, nullptr};
     BPlusNodeIntKeyTest n{node};
-    n.keys = {1,4,7};
+    n.keys = {1,4,7,12};
     n.currentSize = 3;
 
     ASSERT_EQ(n.positionFor(2), 1);
@@ -242,7 +242,7 @@ TEST(BPlusNodeTest, PositionForInnerNode) {
 TEST(BPlusNodeTest, PositionForLeaf) {
     Fugue::BPlusNode<int, 3> node{nullptr, true, nullptr, nullptr, nullptr};
     BPlusNodeIntKeyTest n{node};
-    n.keys = {1,4,7};
+    n.keys = {1,4,7,12};
     n.currentSize = 3;
 
     ASSERT_EQ(n.positionFor(2), 1);
