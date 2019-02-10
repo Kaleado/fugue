@@ -194,17 +194,18 @@ TEST(BPlusTreeTest, IntKeyInsertMoreKeys) {
 
 
 TEST(BPlusTreeTest, IntKeyInsertManyKeys) {
-    int num = 1000;
+    int num = 50;
     Fugue::BPlusTree<int, 3> tree;
-    auto* data1 = new Fugue::DataItem(new int(111), sizeof(int));
-    for(int i = 0; i < num; ++i)
-        tree.insert(i, data1);
-
-    tree.dbgPrint();
 
     for(int i = 0; i < num; ++i){
         std::cout << i << " ";
-        ASSERT_NE(tree.get(i), nullptr);
+        auto* data = new Fugue::DataItem(new int(i), sizeof(int));
+        tree.insert(i, data);
+        for(int j = 0; j < i; ++j){
+            auto p = static_cast<Fugue::DataItem*>(tree.get(j));
+            int itm = p->get<int>();
+            ASSERT_EQ(itm, j);
+        }
     }
 }
 
@@ -221,7 +222,7 @@ public:
     explicit BPlusNodeIntKeyTest(Fugue::BPlusNode<int, 3> n) : _n{n}, keys{n._keys}, currentSize{n._currentSize} {}
 };
 
-TEST(BPlusNodeTest, PositionForInnerNode) {
+TEST(BPlusNodeTest, DISABLED_PositionForInnerNode) {
     Fugue::BPlusNode<int, 3> node{nullptr, false, nullptr, nullptr, nullptr};
     BPlusNodeIntKeyTest n{node};
     n.keys = {1,4,7,12};
@@ -239,7 +240,7 @@ TEST(BPlusNodeTest, PositionForInnerNode) {
     ASSERT_EQ(n.positionFor(11), 1);
 }
 
-TEST(BPlusNodeTest, PositionForLeaf) {
+TEST(BPlusNodeTest, DISABLED_PositionForLeaf) {
     Fugue::BPlusNode<int, 3> node{nullptr, true, nullptr, nullptr, nullptr};
     BPlusNodeIntKeyTest n{node};
     n.keys = {1,4,7,12};
