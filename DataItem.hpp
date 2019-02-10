@@ -6,6 +6,7 @@
 #define FUGUE_DATAITEM_HPP
 
 #include <cstddef>
+#include <new>
 
 namespace Fugue {
 
@@ -13,8 +14,8 @@ namespace Fugue {
     class DataItem {
     private:
     public:
-        std::size_t length;
         void* raw;
+        std::size_t length;
 
         template<class T>
         T& get();
@@ -35,6 +36,9 @@ namespace Fugue {
     void DataItem::free() {
         delete static_cast<T*>(raw);
     }
+
+    template<>
+    void DataItem::free<void>();
 
 }
 
