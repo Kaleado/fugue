@@ -13,11 +13,16 @@ Fugue::ConnectionManager::ConnectionManager(Fugue::ServerConfiguration conf, Fug
     _state.maxValueSize = conf.maxValueSize;
 }
 
-void Fugue::ConnectionManager::_handleWrite(const boost::system::error_code &errorCode, std::size_t bytesTransferred) {
-
+void Fugue::ConnectionManager::_writeResponseText(std::string resp) {
+    boost::system::error_code err;
+    io::write(_tcpSocket, io::buffer(resp), io::transfer_all(), err);
+    if(err){
+        throw std::runtime_error("Error on write: " + err.message() + "\n");
+    }
 }
 
 void Fugue::ConnectionManager::_handleAccept(const boost::system::error_code &errorCode) {
+    io::deadline_timer timer(_ioService, boost::posix_time::seconds(1));
     std::cout << "Accepted a connection\n";
     if(errorCode){
         std::cerr << "Error on accept: " << errorCode.message() << "\n";
@@ -42,13 +47,14 @@ void Fugue::ConnectionManager::_handleReadText(const boost::system::error_code &
     std::istream is{&_dynamicBuffer};
     std::string line;
     std::getline(is, line);
-    // TODO: service request here.
     try {
         auto cmd = _parser.parse(line);
         DataItem buffer;
         cmd->execute(_kvs, _state, buffer);
-        if(buffer.raw && buffer.length)
+        if(buffer.raw && buffer.length){
             std::cout << "Value: " << buffer.get<std::string>() << "\n";
+            _writeResponseText(buffer.get<std::string>());
+        }
         else
             std::cout << "Buffer was null.\n";
     }
@@ -74,6 +80,7 @@ void Fugue::ConnectionManager::_handleReadBinary(const boost::system::error_code
     auto* item = new DataItem(dataString, sizeof(dataString));
     _kvs.insert(_state.settingKey, item);
     _state.status = ServerState::READY_TEXT;
+    _writeResponseText("success");
     _readIfAvailable();
 }
 

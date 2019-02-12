@@ -29,8 +29,6 @@ namespace Fugue {
         CommandParser<std::string> _parser;
         ServerState _state;
 
-        void _handleWrite(const boost::system::error_code& errorCode, std::size_t bytesTransferred);
-
         void _handleAccept(const boost::system::error_code& errorCode);
 
         void _handleReadBinary(const boost::system::error_code &errorCode);
@@ -40,6 +38,8 @@ namespace Fugue {
         void _readIfAvailable();
 
         void _acceptConnection();
+
+        void _writeResponseText(std::string resp);
 
     public:
 
