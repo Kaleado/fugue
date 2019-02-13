@@ -11,7 +11,7 @@ namespace Fugue {
     class ServerState {
     private:
     public:
-        enum Status { STOPPED, STARTING, READY_TEXT, READY_BINARY };
+        enum Status { STOPPED, STARTING, READY_TEXT, READY_SET_BINARY, READY_APPEND_BINARY };
         Status status = STOPPED;
         int activeConnections = 0;
         std::string settingKey = "";

@@ -22,7 +22,6 @@ void Fugue::ConnectionManager::_writeResponseText(std::string resp) {
 }
 
 void Fugue::ConnectionManager::_handleAccept(const boost::system::error_code &errorCode) {
-    io::deadline_timer timer(_ioService, boost::posix_time::seconds(1));
     std::cout << "Accepted a connection\n";
     if(errorCode){
         std::cerr << "Error on accept: " << errorCode.message() << "\n";
@@ -77,8 +76,18 @@ void Fugue::ConnectionManager::_handleReadBinary(const boost::system::error_code
     auto* data = _fixedBuffer;
     //is.get(data, _state.incomingBinaryLength);
     auto* dataString = new std::string(data);
-    auto* item = new DataItem(dataString, sizeof(dataString));
-    _kvs.insert(_state.settingKey, item);
+    if(_state.status == ServerState::READY_SET_BINARY){
+        // Insert the received string in to the store.
+        auto* item = new DataItem(dataString, sizeof(dataString));
+        _kvs.insert(_state.settingKey, item);
+    }
+    else if(_state.status == ServerState::READY_APPEND_BINARY){
+        // Append the received string to the stored string.
+        auto item = static_cast<DataItem*>(_kvs.get(_state.settingKey));
+        auto* contents = static_cast<std::string*>(item->raw);
+        *contents += (*dataString);
+        std::cout << "Appended, new value: " << contents << "\n";
+    }
     _state.status = ServerState::READY_TEXT;
     _writeResponseText("success");
     _readIfAvailable();
@@ -90,14 +99,24 @@ void Fugue::ConnectionManager::_acceptConnection(){
 }
 
 void Fugue::ConnectionManager::_readIfAvailable() {
-    if(_state.status == ServerState::READY_TEXT){
-        auto readHnd = std::bind(&ConnectionManager::_handleReadText, this, std::placeholders::_1);
-        io::async_read_until(_tcpSocket, _dynamicBuffer, '\n', readHnd);
-    }
-    else if(_state.status == ServerState::READY_BINARY){
-        _fixedBuffer = new char[_state.incomingBinaryLength];
-        auto readHnd = std::bind(&ConnectionManager::_handleReadBinary, this, std::placeholders::_1);
-        io::async_read(_tcpSocket, io::buffer(_fixedBuffer, _state.incomingBinaryLength), readHnd);
+    switch(_state.status){
+        case ServerState::READY_TEXT:
+            {
+                auto readHnd = std::bind(&ConnectionManager::_handleReadText, this, std::placeholders::_1);
+                io::async_read_until(_tcpSocket, _dynamicBuffer, '\n', readHnd);
+            }
+            break;
+        case ServerState::READY_SET_BINARY:
+        case ServerState::READY_APPEND_BINARY:
+            {
+                _fixedBuffer = new char[_state.incomingBinaryLength];
+                auto readHnd = std::bind(&ConnectionManager::_handleReadBinary, this, std::placeholders::_1);
+                io::async_read(_tcpSocket, io::buffer(_fixedBuffer, _state.incomingBinaryLength), readHnd);
+            }
+            break;
+        default:
+            std::cerr << "Error: invalid server state.\n";
+            break;
     }
 }
 
