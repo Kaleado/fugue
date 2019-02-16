@@ -59,12 +59,12 @@ namespace Fugue {
 #ifdef DEBUG
             std::cout << "Starting cache clean...\n";
 #endif
-            // TODO: find expired items and free them.
-            // Note: will need a mutex to lock whatever data structure we use to track expirations.
             std::lock_guard<std::mutex> lck{_listMutex};
             for(typename CacheItem::Ptr itm = _expirations;
                 itm != nullptr && itm->expirationTime >= std::chrono::system_clock::now(); itm = itm->next){
                     _store.remove(itm->key);
+                    // TODO: ensure dangling pointer errors will not occur when the removed data item is about to be
+                    // transmitted across the wire!
             }
             std::this_thread::sleep_for(_frequency);
         }

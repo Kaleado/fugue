@@ -7,6 +7,7 @@
 
 #include <array>
 #include <iostream>
+#include <mutex>
 #include "AbstractKeyValueStore.hpp"
 #include "DataItem.hpp"
 
@@ -24,6 +25,7 @@ namespace Fugue {
     class BPlusTree : public Fugue::AbstractKeyValueStore<Key> {
     private:
         BPlusNode<Key, size>* _root;
+        mutable std::mutex _mutex;
     public:
 
 #ifdef DEBUG
@@ -346,16 +348,19 @@ namespace Fugue {
 
     template<class Key, unsigned int size>
     void* BPlusTree<Key, size>::get(Key k) const {
+        std::lock_guard<std::mutex> lck{_mutex};
         return _root->getKeyValue(k);
     }
 
     template<class Key, unsigned int size>
     void BPlusTree<Key, size>::remove(Key k) {
+        std::lock_guard<std::mutex> lck{_mutex};
         _root->searchAndRemoveKey(k);
     }
 
     template<class Key, unsigned int size>
     void BPlusTree<Key, size>::insert(Key k, void* value) {
+        std::lock_guard<std::mutex> lck{_mutex};
         if(_root && _root->_isLeaf)
             _root->_leafInsert(k, value);
         else
