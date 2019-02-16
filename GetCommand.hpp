@@ -2,6 +2,8 @@
 // Created by kaleado on 4/02/19.
 //
 
+#define DEBUG
+
 #ifndef FUGUE_GETCOMMAND_HPP
 #define FUGUE_GETCOMMAND_HPP
 
@@ -24,6 +26,9 @@ namespace Fugue {
 
     template<class Key>
     void GetCommand<Key>::execute(AbstractKeyValueStore<Key> &store, ServerState& state, DataItem& buffer) {
+#ifdef DEBUG
+        std::cout << "Getting key " << _key << "\n";
+#endif
         auto* ptr = store.get(_key);
         if(!ptr) {
             return;
