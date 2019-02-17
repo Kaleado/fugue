@@ -61,7 +61,8 @@ namespace Fugue {
 #endif
             std::lock_guard<std::mutex> lck{_listMutex};
             for(typename CacheItem::Ptr itm = _expirations;
-                itm != nullptr && itm->expirationTime >= std::chrono::system_clock::now(); itm = itm->next){
+                itm != nullptr && itm->expirationTime <= std::chrono::system_clock::now(); itm = itm->next){
+                    auto storeLck = _store.getUniqueLock();
                     _store.remove(itm->key);
                     // TODO: ensure dangling pointer errors will not occur when the removed data item is about to be
                     // transmitted across the wire!

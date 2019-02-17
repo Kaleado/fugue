@@ -49,6 +49,7 @@ void Fugue::ConnectionManager::_handleReadText(const boost::system::error_code &
     try {
         auto cmd = _parser.parse(line);
         DataItem buffer;
+        auto lck = _kvs.getUniqueLock();
         cmd->execute(_kvs, _state, buffer);
         if(buffer.raw && buffer.length){
             std::cout << "Value: " << buffer.get<std::string>() << "\n";
@@ -78,11 +79,13 @@ void Fugue::ConnectionManager::_handleReadBinary(const boost::system::error_code
     auto* dataString = new std::string(data);
     if(_state.status == ServerState::READY_SET_BINARY){
         // Insert the received string in to the store.
+        auto lck = _kvs.getUniqueLock();
         auto* item = new DataItem(dataString, sizeof(dataString));
         _kvs.insert(_state.settingKey, item);
     }
     else if(_state.status == ServerState::READY_APPEND_BINARY){
         // Append the received string to the stored string.
+        auto lck = _kvs.getUniqueLock();
         auto item = static_cast<DataItem*>(_kvs.get(_state.settingKey));
         auto* contents = static_cast<std::string*>(item->raw);
         *contents += (*dataString);

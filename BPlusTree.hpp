@@ -37,6 +37,8 @@ namespace Fugue {
 
         void insert(Key k, void* value);
 
+        std::unique_lock<std::mutex> getUniqueLock();
+
         BPlusTree<Key, size>() : _root{new BPlusNode<Key, size>(this, true, nullptr, nullptr, nullptr)} {}
 
         ~BPlusTree(){
@@ -348,23 +350,28 @@ namespace Fugue {
 
     template<class Key, unsigned int size>
     void* BPlusTree<Key, size>::get(Key k) const {
-        std::lock_guard<std::mutex> lck{_mutex};
+//        std::lock_guard<std::mutex> lck{_mutex};
         return _root->getKeyValue(k);
     }
 
     template<class Key, unsigned int size>
     void BPlusTree<Key, size>::remove(Key k) {
-        std::lock_guard<std::mutex> lck{_mutex};
+//        std::lock_guard<std::mutex> lck{_mutex};
         _root->searchAndRemoveKey(k);
     }
 
     template<class Key, unsigned int size>
     void BPlusTree<Key, size>::insert(Key k, void* value) {
-        std::lock_guard<std::mutex> lck{_mutex};
+//        std::lock_guard<std::mutex> lck{_mutex};
         if(_root && _root->_isLeaf)
             _root->_leafInsert(k, value);
         else
             _root->_innerInsert(k, value);
+    }
+
+    template<class Key, unsigned int size>
+    std::unique_lock<std::mutex> BPlusTree<Key, size>::getUniqueLock() {
+        return std::move(std::unique_lock<std::mutex>(_mutex));
     }
 
 }
