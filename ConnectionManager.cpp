@@ -60,7 +60,7 @@ void Fugue::ConnectionManager::_handleReadText(const boost::system::error_code &
             std::cout << "Buffer was null.\n";
     }
     catch(std::exception& e){
-        std::cerr << "Exception during parse.\n";
+        std::cerr << "Exception whilst executing command.\n";
     }
     _readIfAvailable();
 }
