@@ -50,6 +50,8 @@ namespace Fugue {
 
         void addExpiringKey(Key k, std::chrono::time_point<std::chrono::system_clock> expirationTime);
 
+        void removeExpiringKey(Key k);
+
         ExpirationManager(std::chrono::duration<double> frequency,
                 AbstractKeyValueStore<Key>& store) : _frequency{frequency}, _store{store} {}
     };
@@ -102,10 +104,28 @@ namespace Fugue {
         if(!_expirations)
             _expirations = itm;
         else{
-            for(it = _expirations;
-                it->next != nullptr && it->expirationTime < expirationTime; it = it->next){}
+            for(it = _expirations; it->next != nullptr && it->expirationTime < expirationTime; it = it->next){}
             itm->next = it->next;
             it->next = itm;
+        }
+    }
+
+    template <typename Key>
+    void ExpirationManager<Key>::removeExpiringKey(Key k){
+        typename CacheItem::Ptr it = _expirations;
+        if(!it)
+            throw std::invalid_argument("Error removing expiration from key: expiration list is empty.");
+        // If we removed the head of the list, update it to point to the next item.
+        if(it->key == k){
+            _expirations = it->next;
+        }
+        else{
+            // Iterate until the next item is the one we want to remove, then update the current item's next pointer.
+            for(it = _expirations; it->next != nullptr && it->next->key != k; it = it->next){}
+            if(it->next != nullptr)
+                it->next = it->next->next;
+            else
+                throw std::invalid_argument("Error removing expiration from key: key does not have an expiry.");
         }
     }
 

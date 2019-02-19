@@ -29,7 +29,10 @@ namespace Fugue {
 #ifdef DEBUG
         std::cout << "Setting expiry for key " << _key << " to " << _expiresAfter.count() << " seconds\n";
 #endif
-        expirationManager.addExpiringKey(_key,std::chrono::system_clock::now() + _expiresAfter);
+        if(_expiresAfter.count() == 0)
+            expirationManager.removeExpiringKey(_key);
+        else
+            expirationManager.addExpiringKey(_key,std::chrono::system_clock::now() + _expiresAfter);
         buffer.raw = new std::string("success");
         buffer.length = sizeof(std::string);
     }
