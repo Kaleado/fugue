@@ -52,6 +52,8 @@ namespace Fugue {
 
         void removeExpiringKey(Key k);
 
+        std::chrono::time_point<std::chrono::system_clock> expirationTime(Key k);
+
         ExpirationManager(std::chrono::duration<double> frequency,
                 AbstractKeyValueStore<Key>& store) : _frequency{frequency}, _store{store} {}
     };
@@ -127,6 +129,15 @@ namespace Fugue {
             else
                 throw std::invalid_argument("Error removing expiration from key: key does not have an expiry.");
         }
+    }
+
+    template <typename Key>
+    std::chrono::time_point<std::chrono::system_clock> ExpirationManager<Key>::expirationTime(Key k){
+        for(auto it = _expirations; it != nullptr; it = it->next){
+            if(it->key == k)
+                return it->expirationTime;
+        }
+        throw std::runtime_error("Error getting expiration time: the key did not have an expiry set.");
     }
 
 }

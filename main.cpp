@@ -32,8 +32,6 @@ int main(int argc, char** argv) {
     Fugue::ExpirationManager<std::string> expirationManager{std::chrono::seconds(10), t};
     expirationManager.start();
     Fugue::ConnectionManager cm{Fugue::ServerConfiguration{}, t, expirationManager};
-    t.insert("hello", new Fugue::DataItem(new std::string("goodbye"), sizeof(std::string)));
-    expirationManager.addExpiringKey("hello", std::chrono::system_clock::now() + std::chrono::seconds(30));
     cm.startListening();
 
     item.free<std::string>();
