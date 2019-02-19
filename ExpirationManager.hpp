@@ -61,7 +61,8 @@ namespace Fugue {
             std::cout << "Starting cache clean...\n";
 #endif
             std::lock_guard<std::mutex> lck{_listMutex};
-            for(typename CacheItem::Ptr itm = _expirations;
+            typename CacheItem::Ptr itm;
+            for(itm = _expirations;
                 itm != nullptr && itm->expirationTime <= std::chrono::system_clock::now(); itm = itm->next){
 #ifdef DEBUG
                 std::cout << "Purging key " << itm->key << "\n";
@@ -69,6 +70,13 @@ namespace Fugue {
                 auto storeLck = _store.getUniqueLock();
                 _store.remove(itm->key);
             }
+            _expirations = itm;
+#ifdef DEBUG
+            if(_expirations)
+                std::cout << "New head key of expiration list: " << _expirations->key << "\n";
+            else
+                std::cout << "No more keys to purge due to expiration.\n";
+#endif
             std::this_thread::sleep_for(_frequency);
         }
     }
