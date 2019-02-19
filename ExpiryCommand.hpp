@@ -27,7 +27,7 @@ namespace Fugue {
     void ExpiryCommand<Key>::execute(AbstractKeyValueStore<Key>& store,
             ExpirationManager<Key>& expirationManager, ServerState& state, DataItem& buffer) {
 #ifdef DEBUG
-        std::cout << "Setting expiry for key " << _key << " to " << _expiresAfter.count() << "\n";
+        std::cout << "Setting expiry for key " << _key << " to " << _expiresAfter.count() << " seconds\n";
 #endif
         expirationManager.addExpiringKey(_key,std::chrono::system_clock::now() + _expiresAfter);
         buffer.raw = new std::string("success");
