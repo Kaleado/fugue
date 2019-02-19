@@ -26,6 +26,7 @@ namespace Fugue {
         char* _fixedBuffer;
         io::streambuf _dynamicBuffer;
         AbstractKeyValueStore<std::string>& _kvs;
+        ExpirationManager<std::string>& _expirationManager;
         CommandParser<std::string> _parser;
         ServerState _state;
 
@@ -47,7 +48,7 @@ namespace Fugue {
 
         void shutdown();
 
-        explicit ConnectionManager(Fugue::ServerConfiguration conf, Fugue::AbstractKeyValueStore<std::string>& kvs);
+        explicit ConnectionManager(Fugue::ServerConfiguration conf, Fugue::AbstractKeyValueStore<std::string>& kvs, Fugue::ExpirationManager<std::string>& expirationManager);
 
     };
 

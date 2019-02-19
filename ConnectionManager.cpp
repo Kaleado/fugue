@@ -4,12 +4,13 @@
 
 #include "ConnectionManager.hpp"
 
-Fugue::ConnectionManager::ConnectionManager(Fugue::ServerConfiguration conf, Fugue::AbstractKeyValueStore<std::string>& kvs)
+Fugue::ConnectionManager::ConnectionManager(Fugue::ServerConfiguration conf, Fugue::AbstractKeyValueStore<std::string>& kvs, Fugue::ExpirationManager<std::string>& expirationManager)
 : _tcpEndpoint{io::ip::tcp::endpoint{io::ip::tcp::v4(), conf.listenPort}},
   _tcpAcceptor{io::ip::tcp::acceptor{_ioService, _tcpEndpoint}},
   _tcpSocket{io::ip::tcp::socket{_ioService}},
   _dynamicBuffer{conf.maxValueSize},
-  _kvs{kvs} {
+  _kvs{kvs},
+  _expirationManager{expirationManager} {
     _state.maxValueSize = conf.maxValueSize;
 }
 
@@ -50,7 +51,7 @@ void Fugue::ConnectionManager::_handleReadText(const boost::system::error_code &
         auto cmd = _parser.parse(line);
         DataItem buffer;
         auto lck = _kvs.getUniqueLock();
-        cmd->execute(_kvs, _state, buffer);
+        cmd->execute(_kvs, _expirationManager, _state, buffer);
         if(buffer.raw && buffer.length){
             std::cout << "Value: " << buffer.get<std::string>() << "\n";
             _writeResponseText(buffer.get<std::string>());

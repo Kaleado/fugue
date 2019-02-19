@@ -17,14 +17,14 @@ namespace Fugue {
         std::size_t _length;
     public:
         //! Execute the command in the context of the given underlying storage, writing the result to the buffer.
-        void execute(AbstractKeyValueStore<Key>& store, ServerState& state, DataItem& buffer);
+        void execute(AbstractKeyValueStore<Key>& store, ExpirationManager<Key>& expirationManager, ServerState& state, DataItem& buffer);
 
         explicit SetCommand(Key key, std::size_t& length) : _key{key}, _length{length} {}
 
     };
 
     template<class Key>
-    void SetCommand<Key>::execute(AbstractKeyValueStore<Key> &store, ServerState& state, DataItem& buffer) {
+    void SetCommand<Key>::execute(AbstractKeyValueStore<Key> &store, ExpirationManager<Key>& expirationManager, ServerState& state, DataItem& buffer) {
         if(_length > state.maxValueSize) {
             return;
         }

@@ -8,6 +8,7 @@
 #include <string>
 #include <boost/asio/streambuf.hpp>
 #include "ConnectionManager.hpp"
+#include "ExpirationManager.hpp"
 #include "AbstractKeyValueStore.hpp"
 #include "DataItem.hpp"
 
@@ -23,7 +24,7 @@ namespace Fugue {
         typedef std::shared_ptr<AbstractCommand<Key>> Ptr;
 
         //! Execute the command in the context of the given underlying storage, writing the result to the buffer.
-        virtual void execute(AbstractKeyValueStore<Key>& store, ServerState& state, DataItem& buffer)=0;
+        virtual void execute(AbstractKeyValueStore<Key>& store, ExpirationManager<Key>& expirationManager, ServerState& state, DataItem& buffer)=0;
 
         virtual ~AbstractCommand() = default;
     };
