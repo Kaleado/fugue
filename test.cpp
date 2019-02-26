@@ -331,7 +331,7 @@ TEST(ExpirationManagerTest, ExpiredKeysRemoved){
     mgr.stop();
 }
 
-TEST(BPlusNodeTest, LeftSiblingConsistent) {
+TEST(BPlusNodeTest, DISABLED_LeftSiblingConsistent) {
     Fugue::BPlusTree<int, 3> kvs;
     kvs.insert(0, new Fugue::DataItem(new std::string("str0"), sizeof(std::string)));
     kvs.insert(1, new Fugue::DataItem(new std::string("str1"), sizeof(std::string)));
