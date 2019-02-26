@@ -203,9 +203,9 @@ namespace Fugue {
                 auto* itm = static_cast<DataItem*>(_children[pos]);
                 itm->free<void>();
                 _children[pos] = nullptr;
-                _leftShiftArray<void*, size+2>(_children, pos, 1);
-                _leftShiftArray<Key, size+1>(_keys, pos, 1);
-                _currentSize--;
+                //_leftShiftArray<void*, size+2>(_children, pos, 1);
+                //_leftShiftArray<Key, size+1>(_keys, pos, 1);
+                //_currentSize--;
             }
         }
 
@@ -254,6 +254,7 @@ namespace Fugue {
             if(_isLeaf){
                 Key minKey = _keys[0];
                 _leafRemove(k);
+                return;
                 if(_currentSize < size/2){
                     // TODO: Borrow, merge, etc.
                 }
@@ -270,7 +271,8 @@ namespace Fugue {
             else{
                 unsigned int keyPos = _positionFor(k);
 #ifdef DEBUG
-                assert(keyPos >= 0 && keyPos < _currentSize);
+                std::cerr << keyPos << "/" << _currentSize << " ";
+                assert(keyPos >= 0 && keyPos <= _currentSize);
 #endif
                 if(_children[keyPos])
                     static_cast<BPlusNode<Key, size>*>(_children[keyPos])->searchAndRemoveKey(k);

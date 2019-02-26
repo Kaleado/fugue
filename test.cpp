@@ -293,7 +293,7 @@ TEST(ExpirationManagerTest, ExpiryNotSet){
     ASSERT_ANY_THROW(mgr.expirationTime("key2"));
 }
 
-TEST(ExpirationManagerTest, DISABLED_ExpiredKeysRemoved){
+TEST(ExpirationManagerTest, ExpiredKeysRemoved){
     Fugue::BPlusTree<std::string, 3> kvs;
     kvs.insert("key1", new Fugue::DataItem(new std::string("str1"), sizeof(std::string)));
     auto ptr = kvs.get("key1");
@@ -326,6 +326,7 @@ TEST(ExpirationManagerTest, DISABLED_ExpiredKeysRemoved){
     ASSERT_EQ(ptr2, nullptr);
     ASSERT_EQ(ptr3, nullptr);
     ASSERT_NE(ptr4, nullptr);
+    mgr.stop();
 }
 
 int main(int argc, char** argv){
