@@ -29,6 +29,9 @@ namespace Fugue {
     public:
 
 #ifdef DEBUG
+        //Maintain an increasing debug ID for finding individual nodes in a tree.
+        int _nextDebugId=0;
+
         void dbgPrint();
 
         BPlusNode<Key, size>* getNodeWithDebugId(int debugId);
@@ -41,7 +44,11 @@ namespace Fugue {
 
         std::unique_lock<std::mutex> getUniqueLock();
 
-        BPlusTree<Key, size>() : _root{new BPlusNode<Key, size>(this, true, nullptr, nullptr, nullptr)} {}
+        BPlusTree<Key, size>() : _root{new BPlusNode<Key, size>(this, true, nullptr, nullptr, nullptr)} {
+#ifdef DEBUG
+            _nextDebugId++; // Necessary because the index won't increment in the construction of the root node.
+#endif
+        }
 
         ~BPlusTree(){
             delete _root;
@@ -63,10 +70,8 @@ namespace Fugue {
         std::array<Key, size+1> _keys;
         std::array<void*, size+2> _children;
 #ifdef DEBUG
-        //Maintain an increasing debug ID for finding individual nodes in a tree.
-        static int _nextDebugId;
     public:
-        int debugId;
+        int debugId = -1;
 
         BPlusNode<Key, size>* getChildWithDebugId(int id){
             if(debugId == id)
@@ -299,11 +304,10 @@ namespace Fugue {
             else{
                 unsigned int keyPos = _positionFor(k);
 #ifdef DEBUG
-                std::cerr << keyPos << "/" << _currentSize << " ";
                 assert(keyPos >= 0 && keyPos <= _currentSize);
 #endif
                 if(_children[keyPos])
-                    static_cast<BPlusNode<Key, size>*>(_children[keyPos])->searchAndRemoveKey(k);
+                    static_cast<BPlusNode<Key, size>*>(_children.at(keyPos))->searchAndRemoveKey(k);
             }
         }
 
@@ -347,14 +351,14 @@ namespace Fugue {
         BPlusNode<Key, size>(BPlusTree<Key, size>* tree, bool isLeaf, BPlusNode<Key, size>* parent, BPlusNode<Key, size>* leftSibling, BPlusNode<Key, size>* rightSibling)
                 : _tree{tree}, _isLeaf{isLeaf}, _parent{parent}, _leftSibling{leftSibling}, _rightSibling{rightSibling} {
 #ifdef DEBUG
-            debugId = _nextDebugId++;
+            if(_tree) debugId = _tree->_nextDebugId++;
 #endif
         }
 
         BPlusNode<Key, size>(BPlusTree<Key, size>* tree, bool isLeaf, BPlusNode<Key, size>* parent, BPlusNode<Key, size>* leftSibling, BPlusNode<Key, size>* rightSibling, std::array<Key, size> keys, std::array<void*, size+1> children)
                 : _tree{tree}, _isLeaf{isLeaf}, _parent{parent}, _leftSibling{leftSibling}, _rightSibling{rightSibling}, _keys{keys}, _children{children} {
 #ifdef DEBUG
-            debugId = _nextDebugId++;
+            if(_tree) debugId = _tree->_nextDebugId++;
 #endif
         };
 
@@ -416,9 +420,6 @@ namespace Fugue {
     }
 
 #ifdef DEBUG
-    template<class Key, unsigned int size>
-    int BPlusNode<Key, size>::_nextDebugId = 0;
-
     template<class Key, unsigned int size>
     BPlusNode<Key, size> *BPlusTree<Key, size>::getNodeWithDebugId(int debugId) {
         if(_root)

@@ -218,8 +218,10 @@ public:
     unsigned int& currentSize;
     template <int size>
     void rightShiftArray(std::array<int, size>& arr, int idx, int shiftBy){_n._rightShiftArray<int, size>(arr, idx, shiftBy);}
+    const Fugue::BPlusNode<int, 3>* leftSibling()  { return _n._left(); }
+    const Fugue::BPlusNode<int, 3>* rightSibling() { return _n._right(); }
     int positionFor(int k){ return _n._positionFor(k); }
-    explicit BPlusNodeIntKeyTest(Fugue::BPlusNode<int, 3> n) : _n{n}, keys{n._keys}, currentSize{n._currentSize} {}
+    explicit BPlusNodeIntKeyTest(Fugue::BPlusNode<int, 3>& n) : _n{n}, keys{n._keys}, currentSize{n._currentSize} {}
 };
 
 TEST(BPlusNodeTest, DISABLED_PositionForInnerNode) {
@@ -329,8 +331,31 @@ TEST(ExpirationManagerTest, ExpiredKeysRemoved){
     mgr.stop();
 }
 
+TEST(BPlusNodeTest, LeftSiblingConsistent) {
+    Fugue::BPlusTree<int, 3> kvs;
+    kvs.insert(0, new Fugue::DataItem(new std::string("str0"), sizeof(std::string)));
+    kvs.insert(1, new Fugue::DataItem(new std::string("str1"), sizeof(std::string)));
+    kvs.insert(2, new Fugue::DataItem(new std::string("str2"), sizeof(std::string)));
+    kvs.insert(3, new Fugue::DataItem(new std::string("str3"), sizeof(std::string)));
+    //Note that the right node is always the 'new' node, with the higher debug ID.
+    Fugue::BPlusNode<int,3>* n0 = kvs.getNodeWithDebugId(0);
+    Fugue::BPlusNode<int,3>* n2 = kvs.getNodeWithDebugId(1);
+
+    kvs.dbgPrint();
+
+    ASSERT_NE(n0, nullptr);
+    ASSERT_NE(n2, nullptr);
+
+    BPlusNodeIntKeyTest m0{*n0};
+    BPlusNodeIntKeyTest m2{*n2};
+
+    ASSERT_EQ(m0.rightSibling()->debugId, n2->debugId);
+    ASSERT_EQ(m2.leftSibling()->debugId, n0->debugId);
+}
+
 int main(int argc, char** argv){
     ::testing::InitGoogleTest(&argc, argv);
+//    ::testing::GTEST_FLAG(filter) = "BPlusNodeTestSib*";
     return RUN_ALL_TESTS();
 
 }
