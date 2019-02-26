@@ -275,6 +275,60 @@ TEST(BPlusNodeTest, RightShiftArray) {
     ASSERT_EQ(n.keys, res);
 }
 
+TEST(ExpirationManagerTest, ExpiryIsSet){
+    Fugue::BPlusTree<std::string, 3> kvs;
+    Fugue::ExpirationManager<std::string> mgr{std::chrono::seconds(5), kvs};
+    auto now = std::chrono::system_clock::now();
+    mgr.addExpiringKey("key1", now + std::chrono::seconds(123));
+
+    ASSERT_EQ(mgr.expirationTime("key1"), now + std::chrono::seconds(123));
+}
+
+TEST(ExpirationManagerTest, ExpiryNotSet){
+    Fugue::BPlusTree<std::string, 3> kvs;
+    Fugue::ExpirationManager<std::string> mgr{std::chrono::seconds(5), kvs};
+    auto now = std::chrono::system_clock::now();
+    mgr.addExpiringKey("key1", now + std::chrono::seconds(123));
+
+    ASSERT_ANY_THROW(mgr.expirationTime("key2"));
+}
+
+TEST(ExpirationManagerTest, ExpiredKeysRemoved){
+    Fugue::BPlusTree<std::string, 3> kvs;
+    kvs.insert("key1", new Fugue::DataItem(new std::string("str1"), sizeof(std::string)));
+    auto ptr = kvs.get("key1");
+    ASSERT_NE(ptr, nullptr);
+    Fugue::ExpirationManager<std::string> mgr{std::chrono::seconds(1), kvs};
+    auto now = std::chrono::system_clock::now();
+    mgr.addExpiringKey("key1", now + std::chrono::seconds(1));
+    mgr.start();
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+    auto shouldBeNull = kvs.get("key1");
+    ASSERT_EQ(shouldBeNull, nullptr);
+
+    kvs.insert("key2", new Fugue::DataItem(new std::string("str2"), sizeof(std::string)));
+    kvs.insert("key3", new Fugue::DataItem(new std::string("str3"), sizeof(std::string)));
+    kvs.insert("key4", new Fugue::DataItem(new std::string("str4"), sizeof(std::string)));
+    auto ptr2 = kvs.get("key2");
+    auto ptr3 = kvs.get("key3");
+    auto ptr4 = kvs.get("key4");
+    ASSERT_NE(ptr2, nullptr);
+    ASSERT_NE(ptr3, nullptr);
+    ASSERT_NE(ptr4, nullptr);
+    auto now2 = std::chrono::system_clock::now();
+    mgr.addExpiringKey("key2", now2 + std::chrono::seconds(1));
+    mgr.addExpiringKey("key3", now2 + std::chrono::seconds(1));
+    mgr.addExpiringKey("key4", now2 + std::chrono::seconds(7));
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+    ptr2 = kvs.get("key2");
+    ptr3 = kvs.get("key3");
+    ptr4 = kvs.get("key4");
+    ASSERT_EQ(ptr2, nullptr);
+    ASSERT_EQ(ptr3, nullptr);
+    ASSERT_NE(ptr4, nullptr);
+    mgr.stop();
+}
+
 int main(int argc, char** argv){
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

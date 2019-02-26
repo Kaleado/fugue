@@ -5,10 +5,14 @@
 #ifndef FUGUE_COMMANDPARSER_HPP
 #define FUGUE_COMMANDPARSER_HPP
 
+#include <chrono>
+
 #include "AbstractCommand.hpp"
 #include "GetCommand.hpp"
 #include "SetCommand.hpp"
 #include "RemoveCommand.hpp"
+#include "AppendCommand.hpp"
+#include "ExpiryCommand.hpp"
 
 namespace Fugue {
 
@@ -19,6 +23,8 @@ namespace Fugue {
         typename AbstractCommand<Key>::Ptr _parseGet(std::vector<std::string> tokens);
         typename AbstractCommand<Key>::Ptr _parseSet(std::vector<std::string> tokens);
         typename AbstractCommand<Key>::Ptr _parseRemove(std::vector<std::string> tokens);
+        typename AbstractCommand<Key>::Ptr _parseAppend(std::vector<std::string> tokens);
+        typename AbstractCommand<Key>::Ptr _parseExpiry(std::vector<std::string> tokens);
 
     public:
         typename AbstractCommand<Key>::Ptr parse(std::string str);
@@ -53,6 +59,24 @@ namespace Fugue {
     }
 
     template<class Key>
+    typename AbstractCommand<Key>::Ptr CommandParser<Key>::_parseAppend(std::vector<std::string> tokens) {
+        if(tokens.size() != 3)
+            throw std::invalid_argument("Error parsing command: invalid number of arguments.");
+        std::size_t sz = static_cast<std::size_t>(std::stoi(tokens[2]));
+        std::cout << sz << " sz\n";
+        return std::make_shared<AppendCommand<Key>>(tokens[1], sz);
+    }
+
+    template<class Key>
+    typename AbstractCommand<Key>::Ptr CommandParser<Key>::_parseExpiry(std::vector<std::string> tokens){
+        if(tokens.size() != 3)
+            throw std::invalid_argument("Error parsing command: invalid number of arguments.");
+        auto time = std::chrono::seconds(std::stol(tokens[2]));
+        std::cout << time.count() << " seconds\n";
+        return std::make_shared<ExpiryCommand<Key>>(tokens[1], time);
+    }
+
+    template<class Key>
     typename AbstractCommand<Key>::Ptr CommandParser<Key>::parse(std::string str) {
         std::stringstream ss{str};
         std::vector<std::string> tokens;
@@ -69,6 +93,10 @@ namespace Fugue {
             return _parseSet(tokens);
         else if(command == "remove")
             return _parseRemove(tokens);
+        else if(command == "append")
+            return _parseAppend(tokens);
+        else if(command == "expiry")
+            return _parseExpiry(tokens);
         else
             throw std::invalid_argument("Error parsing command: invalid command.");
     }

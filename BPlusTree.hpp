@@ -7,6 +7,7 @@
 
 #include <array>
 #include <iostream>
+#include <mutex>
 #include "AbstractKeyValueStore.hpp"
 #include "DataItem.hpp"
 
@@ -24,6 +25,7 @@ namespace Fugue {
     class BPlusTree : public Fugue::AbstractKeyValueStore<Key> {
     private:
         BPlusNode<Key, size>* _root;
+        mutable std::mutex _mutex;
     public:
 
 #ifdef DEBUG
@@ -34,6 +36,8 @@ namespace Fugue {
         void remove(Key k);
 
         void insert(Key k, void* value);
+
+        std::unique_lock<std::mutex> getUniqueLock();
 
         BPlusTree<Key, size>() : _root{new BPlusNode<Key, size>(this, true, nullptr, nullptr, nullptr)} {}
 
@@ -199,9 +203,9 @@ namespace Fugue {
                 auto* itm = static_cast<DataItem*>(_children[pos]);
                 itm->free<void>();
                 _children[pos] = nullptr;
-                _leftShiftArray<void*, size+2>(_children, pos, 1);
-                _leftShiftArray<Key, size+1>(_keys, pos, 1);
-                _currentSize--;
+                //_leftShiftArray<void*, size+2>(_children, pos, 1);
+                //_leftShiftArray<Key, size+1>(_keys, pos, 1);
+                //_currentSize--;
             }
         }
 
@@ -250,6 +254,7 @@ namespace Fugue {
             if(_isLeaf){
                 Key minKey = _keys[0];
                 _leafRemove(k);
+                return;
                 if(_currentSize < size/2){
                     // TODO: Borrow, merge, etc.
                 }
@@ -266,7 +271,8 @@ namespace Fugue {
             else{
                 unsigned int keyPos = _positionFor(k);
 #ifdef DEBUG
-                assert(keyPos >= 0 && keyPos < _currentSize);
+                std::cerr << keyPos << "/" << _currentSize << " ";
+                assert(keyPos >= 0 && keyPos <= _currentSize);
 #endif
                 if(_children[keyPos])
                     static_cast<BPlusNode<Key, size>*>(_children[keyPos])->searchAndRemoveKey(k);
@@ -346,20 +352,28 @@ namespace Fugue {
 
     template<class Key, unsigned int size>
     void* BPlusTree<Key, size>::get(Key k) const {
+//        std::lock_guard<std::mutex> lck{_mutex};
         return _root->getKeyValue(k);
     }
 
     template<class Key, unsigned int size>
     void BPlusTree<Key, size>::remove(Key k) {
+//        std::lock_guard<std::mutex> lck{_mutex};
         _root->searchAndRemoveKey(k);
     }
 
     template<class Key, unsigned int size>
     void BPlusTree<Key, size>::insert(Key k, void* value) {
+//        std::lock_guard<std::mutex> lck{_mutex};
         if(_root && _root->_isLeaf)
             _root->_leafInsert(k, value);
         else
             _root->_innerInsert(k, value);
+    }
+
+    template<class Key, unsigned int size>
+    std::unique_lock<std::mutex> BPlusTree<Key, size>::getUniqueLock() {
+        return std::move(std::unique_lock<std::mutex>(_mutex));
     }
 
 }

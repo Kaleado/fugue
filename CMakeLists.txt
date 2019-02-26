@@ -45,8 +45,8 @@ if(!Boost_FOUND)
 endif()
 
 include_directories(${Boost_INCLUDE_DIRS})
-add_executable(fugue main.cpp BPlusTree.hpp ConnectionManager.cpp ConnectionManager.hpp ServerConfiguration.hpp AbstractKeyValueStore.hpp AbstractCommand.hpp CommandParser.hpp GetCommand.hpp DataItem.hpp SetCommand.hpp ServerState.hpp DataItem.cpp RemoveCommand.hpp)
-add_executable(test_fugue test.cpp BPlusTree.hpp ConnectionManager.cpp ConnectionManager.hpp ServerConfiguration.hpp AbstractKeyValueStore.hpp AbstractCommand.hpp CommandParser.hpp GetCommand.hpp DataItem.hpp SetCommand.hpp ServerState.hpp DataItem.cpp RemoveCommand.hpp)
+add_executable(fugue main.cpp BPlusTree.hpp ConnectionManager.cpp ConnectionManager.hpp ServerConfiguration.hpp AbstractKeyValueStore.hpp AbstractCommand.hpp CommandParser.hpp GetCommand.hpp DataItem.hpp SetCommand.hpp ServerState.hpp DataItem.cpp RemoveCommand.hpp AppendCommand.hpp ExpirationManager.hpp ExpiryCommand.hpp)
+add_executable(test_fugue test.cpp BPlusTree.hpp ConnectionManager.cpp ConnectionManager.hpp ServerConfiguration.hpp AbstractKeyValueStore.hpp AbstractCommand.hpp CommandParser.hpp GetCommand.hpp DataItem.hpp SetCommand.hpp ServerState.hpp DataItem.cpp RemoveCommand.hpp AppendCommand.hpp ExpirationManager.hpp ExpiryCommand.hpp)
 target_link_libraries(fugue ${Boost_LIBRARIES} gtest_main)
 target_link_libraries(test_fugue ${Boost_LIBRARIES} gtest_main)
 

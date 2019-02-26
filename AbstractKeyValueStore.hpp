@@ -5,6 +5,8 @@
 #ifndef FUGUE_ABSTRACTKEYVALUESTORE_HPP
 #define FUGUE_ABSTRACTKEYVALUESTORE_HPP
 
+#include <mutex>
+
 namespace Fugue {
 
     //! Abstract class representing any kind of underlying storage for a key-value store.
@@ -17,6 +19,9 @@ namespace Fugue {
         virtual void remove(Key k) = 0;
 
         virtual void insert(Key k, void* value) = 0;
+
+        virtual std::unique_lock<std::mutex> getUniqueLock() = 0;
+
     };
 }
 

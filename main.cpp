@@ -9,6 +9,7 @@
 #include "ConnectionManager.hpp"
 #include "CommandParser.hpp"
 #include "DataItem.hpp"
+#include "ExpirationManager.hpp"
 
 int main(int argc, char** argv) {
     // Set up program options.
@@ -28,8 +29,11 @@ int main(int argc, char** argv) {
     Fugue::BPlusTree<std::string, 3> t;
 
     Fugue::DataItem item;
-    Fugue::ConnectionManager cm{Fugue::ServerConfiguration{}, t};
+    Fugue::ExpirationManager<std::string> expirationManager{std::chrono::seconds(10), t};
+    expirationManager.start();
+    Fugue::ConnectionManager cm{Fugue::ServerConfiguration{}, t, expirationManager};
     cm.startListening();
+
     item.free<std::string>();
 
     return 0;
