@@ -46,7 +46,8 @@ namespace Fugue {
 
         BPlusTree<Key, size>() : _root{new BPlusNode<Key, size>(this, true, nullptr, nullptr, nullptr)} {
 #ifdef DEBUG
-            _nextDebugId++; // Necessary because the index won't increment in the construction of the root node.
+            _root->debugId = 0;
+            _nextDebugId = 1; // Necessary because the index won't increment in the construction of the root node.
 #endif
         }
 
