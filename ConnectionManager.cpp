@@ -77,7 +77,8 @@ void Fugue::ConnectionManager::_handleReadBinary(const boost::system::error_code
     }
     auto* data = _fixedBuffer;
     //is.get(data, _state.incomingBinaryLength);
-    auto* dataString = new std::string(data);
+    //TODO: fix heap overflow here.
+    auto* dataString = new std::string(data, _state.incomingBinaryLength);
     if(_state.status == ServerState::READY_SET_BINARY){
         // Insert the received string in to the store.
         auto lck = _kvs.getUniqueLock();

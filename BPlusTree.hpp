@@ -30,6 +30,8 @@ namespace Fugue {
 
 #ifdef DEBUG
         void dbgPrint();
+
+        BPlusNode<Key, size>* getNodeWithDebugId(int debugId);
 #endif
         void* get(Key k) const;
 
@@ -60,6 +62,26 @@ namespace Fugue {
         unsigned int _currentSize = 0;
         std::array<Key, size+1> _keys;
         std::array<void*, size+2> _children;
+#ifdef DEBUG
+        //Maintain an increasing debug ID for finding individual nodes in a tree.
+        static int _nextDebugId;
+    public:
+        int debugId;
+
+        BPlusNode<Key, size>* getChildWithDebugId(int id){
+            if(debugId == id)
+                return this;
+            else if(_isLeaf)
+                return nullptr;
+            for(int i = 0; i <= _currentSize; ++i){
+                BPlusNode<Key, size>* result = static_cast<BPlusNode<Key, size>*>(_children[i])->getChildWithDebugId(id);
+                if(result != nullptr)
+                    return result;
+            }
+            return nullptr;
+        }
+    private:
+#endif
 
         //! Finds the index of the given child node in _children.
         int _positionOfChild(BPlusNode<Key, size> const* c) const {
@@ -73,15 +95,19 @@ namespace Fugue {
 
         //! Returns the left sibling of this node.
         const BPlusNode<Key, size>* _left() const {
+            return _leftSibling;
             if(_parent == nullptr) return nullptr;
             int pos = _parent->_positionOfChild(this);
+            //TODO: handle case where there is a left sibling in another subtree.
             return pos <= 0 ? nullptr : static_cast<BPlusNode<Key, size>*>(_parent->_children[pos - 1]);
         }
 
         //! Returns the right sibling of this node.
         const BPlusNode<Key, size>* _right() const {
+            return _rightSibling;
             if(_parent == nullptr) return nullptr;
-            unsigned int pos = _parent->_positionOfChild(this);
+            int pos = _parent->_positionOfChild(this);
+            //TODO: handle case where there is a right sibling in another subtree.
             return pos + 1 > _parent->_currentSize || pos < 0 ? nullptr : static_cast<BPlusNode<Key, size>*>(_parent->_children[pos + 1]);
         }
 
@@ -145,7 +171,10 @@ namespace Fugue {
                 newNode->_parent = _parent;
                 _tree->_root = _parent;
             }
+            newNode->_leftSibling = this;
+            _rightSibling = newNode;
             //Insert the appropriate node as the left child.
+            _parent->_isLeaf = false;
             _parent->_leafInsert(middleKey, this);
             _parent->_insertChildAfter(middleKey, newNode);
         }
@@ -254,7 +283,6 @@ namespace Fugue {
             if(_isLeaf){
                 Key minKey = _keys[0];
                 _leafRemove(k);
-                return;
                 if(_currentSize < size/2){
                     // TODO: Borrow, merge, etc.
                 }
@@ -294,6 +322,9 @@ namespace Fugue {
             _rightSibling = rhs._rightSibling;
             _keys = rhs._keys;
             _tree = rhs._tree;
+#ifdef DEBUG
+            debugId = rhs.debugId;
+#endif
             return *this;
         }
 
@@ -306,15 +337,26 @@ namespace Fugue {
             _children = rhs._children;
             _keys = rhs._keys;
             _tree = rhs._tree;
+#ifdef DEBUG
+            debugId = rhs.debugId;
+#endif
         }
 
         ~BPlusNode<Key, size>() = default;
 
         BPlusNode<Key, size>(BPlusTree<Key, size>* tree, bool isLeaf, BPlusNode<Key, size>* parent, BPlusNode<Key, size>* leftSibling, BPlusNode<Key, size>* rightSibling)
-                : _tree{tree}, _isLeaf{isLeaf}, _parent{parent}, _leftSibling{leftSibling}, _rightSibling{rightSibling} {}
+                : _tree{tree}, _isLeaf{isLeaf}, _parent{parent}, _leftSibling{leftSibling}, _rightSibling{rightSibling} {
+#ifdef DEBUG
+            debugId = _nextDebugId++;
+#endif
+        }
 
         BPlusNode<Key, size>(BPlusTree<Key, size>* tree, bool isLeaf, BPlusNode<Key, size>* parent, BPlusNode<Key, size>* leftSibling, BPlusNode<Key, size>* rightSibling, std::array<Key, size> keys, std::array<void*, size+1> children)
-                : _tree{tree}, _isLeaf{isLeaf}, _parent{parent}, _leftSibling{leftSibling}, _rightSibling{rightSibling}, _keys{keys}, _children{children} {};
+                : _tree{tree}, _isLeaf{isLeaf}, _parent{parent}, _leftSibling{leftSibling}, _rightSibling{rightSibling}, _keys{keys}, _children{children} {
+#ifdef DEBUG
+            debugId = _nextDebugId++;
+#endif
+        };
 
         friend class BPlusTree<Key, size>;
     };
@@ -325,13 +367,10 @@ namespace Fugue {
         std::cout << "Node " << this << " is " << (_isLeaf ? "" : "not ") << "a leaf.\n";
         std::cout << "Parent: " << _parent << "\n";
         std::cout << "Siblings: " << _left() << " " << _right() << "\n";
+        std::cout << "Debug ID: " << debugId << "\n";
         for(unsigned int i = 0; i < _currentSize; ++i){
             std::cout << _keys.at(i) << " ";
         }
-//        std::cout << "\n";
-//        for(unsigned int i = 0; i <= _currentSize; ++i){
-//            std::cout << _children.at(i) << " ";
-//        }
         std::cout << "\n\n";
         if(_isLeaf)
             return;
@@ -375,6 +414,18 @@ namespace Fugue {
     std::unique_lock<std::mutex> BPlusTree<Key, size>::getUniqueLock() {
         return std::move(std::unique_lock<std::mutex>(_mutex));
     }
+
+#ifdef DEBUG
+    template<class Key, unsigned int size>
+    int BPlusNode<Key, size>::_nextDebugId = 0;
+
+    template<class Key, unsigned int size>
+    BPlusNode<Key, size> *BPlusTree<Key, size>::getNodeWithDebugId(int debugId) {
+        if(_root)
+            return _root->getChildWithDebugId(debugId);
+        return nullptr;
+    }
+#endif
 
 }
 
