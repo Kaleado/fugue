@@ -338,19 +338,19 @@ TEST(BPlusNodeTest, LeftSiblingConsistent) {
     kvs.insert(2, new Fugue::DataItem(new std::string("str2"), sizeof(std::string)));
     kvs.insert(3, new Fugue::DataItem(new std::string("str3"), sizeof(std::string)));
     //Note that the right node is always the 'new' node, with the higher debug ID.
-    Fugue::BPlusNode<int,3>* n0 = kvs.getNodeWithDebugId(0);
-    Fugue::BPlusNode<int,3>* n2 = kvs.getNodeWithDebugId(1);
+    Fugue::BPlusNode<int,3>* nl = kvs.getNodeWithDebugId(0);
+    Fugue::BPlusNode<int,3>* nr = kvs.getNodeWithDebugId(1);
 
     kvs.dbgPrint();
 
-    ASSERT_NE(n0, nullptr);
-    ASSERT_NE(n2, nullptr);
+    ASSERT_NE(nl, nullptr);
+    ASSERT_NE(nr, nullptr);
 
-    BPlusNodeIntKeyTest m0{*n0};
-    BPlusNodeIntKeyTest m2{*n2};
+    BPlusNodeIntKeyTest ml{*nl};
+    BPlusNodeIntKeyTest mr{*nr};
 
-    ASSERT_EQ(m0.rightSibling()->debugId, n2->debugId);
-    ASSERT_EQ(m2.leftSibling()->debugId, n0->debugId);
+    ASSERT_EQ(ml.rightSibling()->debugId, nr->debugId);
+    ASSERT_EQ(mr.leftSibling()->debugId, nl->debugId);
 }
 
 int main(int argc, char** argv){
