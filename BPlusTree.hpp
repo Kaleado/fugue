@@ -234,7 +234,7 @@ namespace Fugue {
 
         void _leafRemove(Key k){
             unsigned int pos = _positionFor(k);
-            if(_children[pos]){
+            if(pos >= 0 && pos < _currentSize && _children[pos]){
                 auto* itm = static_cast<DataItem*>(_children[pos]);
                 itm->free<void>();
                 _children[pos] = nullptr;

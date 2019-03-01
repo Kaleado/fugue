@@ -32,6 +32,7 @@ void Fugue::ConnectionManager::_handleAccept(const boost::system::error_code &er
         _state.activeConnections++;
         _readIfAvailable();
     }
+    _acceptConnection();
 }
 
 void Fugue::ConnectionManager::_handleReadText(const boost::system::error_code &errorCode) {
@@ -72,7 +73,7 @@ void Fugue::ConnectionManager::_handleReadBinary(const boost::system::error_code
     if(errorCode){
         std::cerr << errorCode.message() << "\n";
         _tcpSocket.close();
-        _acceptConnection();
+//        _acceptConnection();
         return;
     }
     auto* data = _fixedBuffer;
