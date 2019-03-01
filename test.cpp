@@ -224,7 +224,7 @@ public:
     explicit BPlusNodeIntKeyTest(Fugue::BPlusNode<int, 3>& n) : _n{n}, keys{n._keys}, currentSize{n._currentSize} {}
 };
 
-TEST(BPlusNodeTest, DISABLED_PositionForInnerNode) {
+TEST(BPlusNodeTest, PositionForInnerNode) {
     Fugue::BPlusNode<int, 3> node{nullptr, false, nullptr, nullptr, nullptr};
     BPlusNodeIntKeyTest n{node};
     n.keys = {1,4,7,12};
@@ -331,7 +331,7 @@ TEST(ExpirationManagerTest, ExpiredKeysRemoved){
     mgr.stop();
 }
 
-TEST(BPlusNodeTest, LeftSiblingConsistent) {
+TEST(BPlusNodeTestSibling, LeftSiblingConsistent) {
     Fugue::BPlusTree<int, 3> kvs;
     kvs.insert(0, new Fugue::DataItem(new std::string("str0"), sizeof(std::string)));
     kvs.insert(1, new Fugue::DataItem(new std::string("str1"), sizeof(std::string)));
@@ -351,11 +351,30 @@ TEST(BPlusNodeTest, LeftSiblingConsistent) {
 
     ASSERT_EQ(ml.rightSibling()->debugId, nr->debugId);
     ASSERT_EQ(mr.leftSibling()->debugId, nl->debugId);
+
+    kvs.insert(4, new Fugue::DataItem(new std::string("str4"), sizeof(std::string)));
+    kvs.insert(5, new Fugue::DataItem(new std::string("str5"), sizeof(std::string)));
+    kvs.insert(6, new Fugue::DataItem(new std::string("str6"), sizeof(std::string)));
+
+    nl = kvs.getNodeWithDebugId(1);
+    nr = kvs.getNodeWithDebugId(3);
+
+    kvs.dbgPrint();
+
+    ASSERT_NE(nl, nullptr);
+    ASSERT_NE(nr, nullptr);
+
+    BPlusNodeIntKeyTest pl{*nl};
+    BPlusNodeIntKeyTest pr{*nr};
+
+    ASSERT_EQ(pl.rightSibling()->debugId, nr->debugId);
+    ASSERT_EQ(pr.leftSibling()->debugId, nl->debugId);
+
 }
 
 int main(int argc, char** argv){
     ::testing::InitGoogleTest(&argc, argv);
-//    ::testing::GTEST_FLAG(filter) = "BPlusNodeTestSib*";
+//    ::testing::GTEST_FLAG(filter) = "BPlusNodeTest*";
     return RUN_ALL_TESTS();
 
 }
