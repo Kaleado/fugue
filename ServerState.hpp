@@ -16,7 +16,7 @@ namespace Fugue {
         int activeConnections = 0;
         std::string settingKey = "";
         std::size_t incomingBinaryLength = 0;
-        std::size_t maxValueSize = 0;
+        std::size_t maxTransferSize = 0;
     };
 }
 

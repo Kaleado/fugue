@@ -8,10 +8,10 @@ Fugue::ConnectionManager::ConnectionManager(Fugue::ServerConfiguration conf, Fug
 : _tcpEndpoint{io::ip::tcp::endpoint{io::ip::tcp::v4(), conf.listenPort}},
   _tcpAcceptor{io::ip::tcp::acceptor{_ioService, _tcpEndpoint}},
   _tcpSocket{io::ip::tcp::socket{_ioService}},
-  _dynamicBuffer{conf.maxValueSize},
+  _dynamicBuffer{conf.maxTransferSize},
   _kvs{kvs},
   _expirationManager{expirationManager} {
-    _state.maxValueSize = conf.maxValueSize;
+    _state.maxTransferSize = conf.maxTransferSize;
 }
 
 void Fugue::ConnectionManager::_writeResponseText(std::string resp) {

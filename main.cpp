@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
     ("listen-port", boost::program_options::value<unsigned short int>(), "set TCP port to listen on")
     ("clean-frequency", boost::program_options::value<unsigned int>(),
             "set the amount of time (in seconds) between each cache clean, or 0 to disable value expiration")
-    ("max-value-size", boost::program_options::value<unsigned int>(), "set the maximum size (in bytes) for a value");
+    ("max-transfer-size", boost::program_options::value<unsigned int>(), "set the maximum transfer size (in bytes)");
     boost::program_options::variables_map vars;
     boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), vars);
     boost::program_options::notify(vars);
@@ -35,8 +35,8 @@ int main(int argc, char** argv) {
         config.listenPort = vars["listen-port"].as<unsigned short int>();
     }
 
-    if(vars.count("max-value-size")){
-        config.maxValueSize = vars["max-value-size"].as<unsigned int>();
+    if(vars.count("max-transfer-size")){
+        config.maxTransferSize = vars["max-transfer-size"].as<unsigned int>();
     }
 
     if(vars.count("clean-frequency")){

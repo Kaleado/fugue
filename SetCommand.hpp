@@ -25,7 +25,7 @@ namespace Fugue {
 
     template<class Key>
     void SetCommand<Key>::execute(AbstractKeyValueStore<Key> &store, ExpirationManager<Key>& expirationManager, ServerState& state, DataItem& buffer) {
-        if(_length > state.maxValueSize) {
+        if(_length > state.maxTransferSize) {
             buffer.raw = nullptr;
             buffer.length = 0;
             state.status = ServerState::READY_TEXT;
