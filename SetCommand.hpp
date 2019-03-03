@@ -26,7 +26,10 @@ namespace Fugue {
     template<class Key>
     void SetCommand<Key>::execute(AbstractKeyValueStore<Key> &store, ExpirationManager<Key>& expirationManager, ServerState& state, DataItem& buffer) {
         if(_length > state.maxValueSize) {
-            return;
+            buffer.raw = nullptr;
+            buffer.length = 0;
+            state.status = ServerState::READY_TEXT;
+            throw std::runtime_error("Value too large");
         }
         buffer.raw = new std::string("success");
         buffer.length = sizeof(std::string);

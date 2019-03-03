@@ -60,6 +60,8 @@ namespace Fugue {
 
     template<class Key>
     void ExpirationManager<Key>::_cleanExpiredItems() {
+        if(_frequency.count() == 0)
+            return;
         while(!_shouldStop.load()){
 #ifdef DEBUG
             std::cout << "Starting cache clean...\n";
