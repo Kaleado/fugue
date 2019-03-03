@@ -32,9 +32,9 @@ namespace Fugue {
 
         void _handleAccept(const boost::system::error_code& errorCode);
 
-        void _handleReadBinary(const boost::system::error_code &errorCode);
+        void _handleReadBinary(const boost::system::error_code &errorCode, size_t bytesTransferred);
 
-        void _handleReadText(const boost::system::error_code &errorCode);
+        void _handleReadText(const boost::system::error_code &errorCode, size_t bytesTransferred);
 
         void _readIfAvailable();
 

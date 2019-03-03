@@ -34,12 +34,13 @@ void Fugue::ConnectionManager::_handleAccept(const boost::system::error_code &er
     }
 }
 
-void Fugue::ConnectionManager::_handleReadText(const boost::system::error_code &errorCode) {
+void Fugue::ConnectionManager::_handleReadText(const boost::system::error_code &errorCode, size_t bytesTransferred) {
 #ifdef DEBUG
-    std::cout << "Reading text from a connection.\n";
+    std::cout << "Reading " << bytesTransferred << " bytes of text data from from a connection.\n";
 #endif
     if(errorCode){
         std::cerr << errorCode.message() << "\n";
+        _dynamicBuffer.consume(_dynamicBuffer.size());
         _tcpSocket.close();
         _acceptConnection();
         return;
@@ -61,16 +62,18 @@ void Fugue::ConnectionManager::_handleReadText(const boost::system::error_code &
     }
     catch(std::exception& e){
         std::cerr << "Exception whilst executing command.\n";
+        std::cerr << e.what() << "\n";
     }
     _readIfAvailable();
 }
 
-void Fugue::ConnectionManager::_handleReadBinary(const boost::system::error_code &errorCode) {
+void Fugue::ConnectionManager::_handleReadBinary(const boost::system::error_code &errorCode, size_t bytesTransferred) {
 #ifdef DEBUG
-    std::cout << "Reading binary from a connection.\n";
+    std::cout << "Reading " << bytesTransferred << " bytes of binary data from from a connection.\n";
 #endif
     if(errorCode){
         std::cerr << errorCode.message() << "\n";
+        _dynamicBuffer.consume(_dynamicBuffer.size());
         _tcpSocket.close();
         _acceptConnection();
         return;
@@ -107,7 +110,7 @@ void Fugue::ConnectionManager::_readIfAvailable() {
     switch(_state.status){
         case ServerState::READY_TEXT:
             {
-                auto readHnd = std::bind(&ConnectionManager::_handleReadText, this, std::placeholders::_1);
+                auto readHnd = std::bind(&ConnectionManager::_handleReadText, this, std::placeholders::_1, std::placeholders::_2);
                 io::async_read_until(_tcpSocket, _dynamicBuffer, '\n', readHnd);
             }
             break;
@@ -115,7 +118,7 @@ void Fugue::ConnectionManager::_readIfAvailable() {
         case ServerState::READY_APPEND_BINARY:
             {
                 _fixedBuffer = new char[_state.incomingBinaryLength];
-                auto readHnd = std::bind(&ConnectionManager::_handleReadBinary, this, std::placeholders::_1);
+                auto readHnd = std::bind(&ConnectionManager::_handleReadBinary, this, std::placeholders::_1, std::placeholders::_2);
                 io::async_read(_tcpSocket, io::buffer(_fixedBuffer, _state.incomingBinaryLength), readHnd);
             }
             break;
