@@ -34,8 +34,8 @@ namespace Fugue {
         };
 
         std::atomic<bool> _shouldStop{false};
-        AbstractKeyValueStore<Key>& _store;
         std::chrono::duration<double> _frequency;
+        AbstractKeyValueStore<Key>& _store;
         std::thread _workerThread;
         std::mutex _listMutex;
         typename CacheItem::Ptr _expirations = nullptr;
