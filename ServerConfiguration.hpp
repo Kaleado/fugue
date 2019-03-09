@@ -15,7 +15,8 @@ namespace Fugue {
     private:
     public:
         unsigned short listenPort = 11311;
-        std::size_t maxValueSize = 1024;
+        std::size_t maxTransferSize = 1024;
+        unsigned int cleanFrequency = 5;
     };
 
 }

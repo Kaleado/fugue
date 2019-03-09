@@ -242,7 +242,7 @@ TEST(BPlusNodeTest, PositionForInnerNode) {
     ASSERT_EQ(n.positionFor(11), 1);
 }
 
-TEST(BPlusNodeTest, DISABLED_PositionForLeaf) {
+TEST(BPlusNodeTest, PositionForLeaf) {
     Fugue::BPlusNode<int, 3> node{nullptr, true, nullptr, nullptr, nullptr};
     BPlusNodeIntKeyTest n{node};
     n.keys = {1,4,7,12};

@@ -79,7 +79,7 @@ namespace Fugue {
                 return this;
             else if(_isLeaf)
                 return nullptr;
-            for(int i = 0; i <= _currentSize; ++i){
+            for(unsigned int i = 0; i <= _currentSize; ++i){
                 BPlusNode<Key, size>* result = static_cast<BPlusNode<Key, size>*>(_children[i])->getChildWithDebugId(id);
                 if(result != nullptr)
                     return result;
@@ -102,19 +102,11 @@ namespace Fugue {
         //! Returns the left sibling of this node.
         const BPlusNode<Key, size>* _left() const {
             return _leftSibling;
-            if(_parent == nullptr) return nullptr;
-            int pos = _parent->_positionOfChild(this);
-            //TODO: handle case where there is a left sibling in another subtree.
-            return pos <= 0 ? nullptr : static_cast<BPlusNode<Key, size>*>(_parent->_children[pos - 1]);
         }
 
         //! Returns the right sibling of this node.
         const BPlusNode<Key, size>* _right() const {
             return _rightSibling;
-            if(_parent == nullptr) return nullptr;
-            int pos = _parent->_positionOfChild(this);
-            //TODO: handle case where there is a right sibling in another subtree.
-            return pos + 1 > _parent->_currentSize || pos < 0 ? nullptr : static_cast<BPlusNode<Key, size>*>(_parent->_children[pos + 1]);
         }
 
         //! Returns the index of the child node where key k lies.
